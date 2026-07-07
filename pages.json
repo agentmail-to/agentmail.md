@@ -1,0 +1,6 @@
+[
+  { "slug": "signup", "title": "Sign up" },
+  { "slug": "core", "title": "Core API" },
+  { "slug": "webhooks", "title": "Webhooks" },
+  { "slug": "websockets", "title": "WebSockets" }
+]

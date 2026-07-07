@@ -1,8 +1,15 @@
 # AgentMail Skills
 
-Markdown skills that teach an AI agent how to use [AgentMail](https://agentmail.to) —
-the email inbox API for agents. Each skill is a raw markdown file you can fetch
-and drop straight into an agent's context.
+[AgentMail](https://agentmail.to) is an email inbox API built for AI agents —
+create an inbox, then send, receive, and thread real email over a REST API.
+
+This site publishes **skills**: focused, self-contained guides that teach an agent
+how to use AgentMail. Each one is served as raw markdown, so an agent can fetch it
+and drop it straight into its context — no extension needed:
+
+```bash
+curl https://agentmail.md/core
+```
 
 ## Skills
 
@@ -11,16 +18,10 @@ and drop straight into an agent's context.
 - **[webhooks](https://agentmail.md/webhooks)** — receive email events by push to a public HTTPS URL; verify Svix signatures; build an event-driven agent.
 - **[websockets](https://agentmail.md/websockets)** — stream email events over a WebSocket with no public URL; react in real time (e.g. wait for an OTP).
 
-New agent with no API key? Start with **signup**. Otherwise start with **core** — the
+New here with no API key? Start with **signup**. Otherwise start with **core** — the
 other skills assume the auth and endpoint basics it covers.
 
-## Usage
+## Machine-readable index
 
-Fetch any skill as raw markdown — no extension needed:
-
-```bash
-curl https://agentmail.md/core
-```
-
-The `.md` form works too (`https://agentmail.md/core.md`), and the
-root path serves this index.
+- [`/llms.txt`](https://agentmail.md/llms.txt) — the full skill map, one line each.
+- [`/llms-full.txt`](https://agentmail.md/llms-full.txt) — every skill concatenated into a single file.
