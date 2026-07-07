@@ -186,9 +186,3 @@ Then, off the request path, handle the event: load context with
 **⚠️ Self-loop warning:** your own replies emit `message.sent` and `message.delivered`
 events. If your handler reacts to those, it can email itself in a loop. **Gate on
 `event_type == "message.received"`** (and ignore mail from your own inbox address).
-
-## Related skills
-
-- [core](https://agentmail.md/core) — send/receive/reply, fetch full bodies, threads.
-- [websockets](https://agentmail.md/websockets) — same events with no public URL.
-- [signup](https://agentmail.md/signup) — get an API key first.

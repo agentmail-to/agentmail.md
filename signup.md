@@ -163,12 +163,3 @@ is optional.
   curl "https://api.agentmail.to/v0/metrics?event_types=message.bounced&event_types=message.sent" \
     -H "Authorization: Bearer $AGENTMAIL_API_KEY"
   ```
-
-## Related skills
-
-- [core](https://agentmail.md/core) — the full inbox/send/receive/reply API once you
-  have a key.
-- [websockets](https://agentmail.md/websockets) — block on the human's OTP reply in
-  real time.
-- [webhooks](https://agentmail.md/webhooks) — event-driven handling once you're claimed
-  and can receive mail.

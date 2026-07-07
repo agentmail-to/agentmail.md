@@ -89,12 +89,18 @@ function loadPages() {
 
 const url = (slug) => `${SITE.baseUrl}/${slug}`;
 
-// Nav footer appended to each indexed page's served copy — absolute links to its
-// `related` pages, so navigation survives the page being fetched alone.
-function relatedFooter(page, bySlug) {
+// A "Related" section appended to each indexed page's served copy. Each entry is
+// an absolute link to a `related` page plus that page's own frontmatter
+// description, so navigation survives the page being fetched alone.
+function relatedSection(page, bySlug) {
   if (!page.related.length) return "";
-  const links = page.related.map((slug) => `[${bySlug.get(slug).title}](${url(slug)})`).join(" · ");
-  return `\n\n---\n\n**Related:** ${links}\n`;
+  const bullets = page.related
+    .map((slug) => {
+      const r = bySlug.get(slug);
+      return `- [${r.title}](${url(slug)}) — ${r.description}`;
+    })
+    .join("\n");
+  return `\n\n## Related\n\n${bullets}\n`;
 }
 
 // Spec: https://llmstxt.org — H1 + blockquote summary, then an H2 link-list section.
@@ -153,14 +159,14 @@ rmSync(OUT, { recursive: true, force: true });
 mkdirSync(OUT, { recursive: true });
 
 // Copy all served markdown to the output root (so /<name> -> /<name>.md). Indexed
-// pages get a Related nav footer appended; unindexed pages are copied verbatim.
+// pages get a Related section appended; unindexed pages are copied verbatim.
 const byFile = new Map(pages.map((p) => [p.file, p]));
 const bySlug = new Map(pages.map((p) => [p.slug, p]));
 const served = readdirSync(ROOT).filter((f) => f.endsWith(".md") && !NOT_SERVED.has(f));
 for (const f of served) {
   const raw = readFileSync(join(ROOT, f), "utf8");
-  const footer = byFile.has(f) ? relatedFooter(byFile.get(f), bySlug) : "";
-  writeFileSync(join(OUT, f), footer ? raw.trimEnd() + footer : raw);
+  const section = byFile.has(f) ? relatedSection(byFile.get(f), bySlug) : "";
+  writeFileSync(join(OUT, f), section ? raw.trimEnd() + section : raw);
 }
 
 writeFileSync(join(OUT, "llms.txt"), buildLlms(pages));

@@ -294,9 +294,3 @@ const client = new AgentMailClient({ apiKey: process.env.AGENTMAIL_API_KEY });
 
 Confirm the latest install names and method signatures at
 `https://docs.agentmail.to/quickstart`.
-
-## Related skills
-
-- [signup](https://agentmail.md/signup) — get an API key with no human in the console.
-- [webhooks](https://agentmail.md/webhooks) — receive events by push to a public URL.
-- [websockets](https://agentmail.md/websockets) — stream events with no public URL.

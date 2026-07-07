@@ -175,10 +175,3 @@ For a long-running reactive agent:
    connection.
 5. **Avoid self-loops:** subscribe only to `message.received` (not `message.sent` /
    `.delivered`) and ignore mail from your own address.
-
-## Related skills
-
-- [core](https://agentmail.md/core) — reply/send/fetch over REST (the WebSocket only
-  receives).
-- [webhooks](https://agentmail.md/webhooks) — the same events pushed to a public URL.
-- [signup](https://agentmail.md/signup) — uses this skill to wait for the human's OTP.

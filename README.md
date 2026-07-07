@@ -50,12 +50,13 @@ that keeps `title`/`order` out of every file and in one place.
 
 An ordered list of the indexed pages. A page's **order is its position in the array**
 (reorder = move a line), its display **title** is the `title` field, and `related`
-(optional) is a list of slugs rendered as a `**Related:**` nav footer on that page's
-served copy (absolute links, so navigation survives the page being fetched alone):
+(optional) is a list of slugs rendered as a `## Related` section on that page's served
+copy. Each related link uses the *target* page's title and frontmatter description —
+so the notes stay in sync automatically and there's no prose to maintain here:
 
 ```json
 [
-  { "slug": "signup", "title": "Sign up",  "related": ["core"] },
+  { "slug": "signup", "title": "Sign up",  "related": ["core", "websockets", "webhooks"] },
   { "slug": "core",   "title": "Core API", "related": ["signup", "webhooks", "websockets"] }
 ]
 ```
@@ -70,7 +71,7 @@ slug that isn't an indexed page — is an error.
 
 | Output | Source | Purpose |
 | --- | --- | --- |
-| `index.md`, `<name>.md` | copied (indexed pages get a `**Related:**` footer) | the landing page + each indexed page |
+| `index.md`, `<name>.md` | copied (indexed pages get a `## Related` section) | the landing page + each indexed page |
 | `llms.txt` | generated from indexed pages | [llms.txt](https://llmstxt.org) discovery index for LLM tooling |
 | `llms-full.txt` | generated from indexed pages | every page concatenated — one fetch for all of it |
 | `sitemap.xml` | root + indexed pages | for search-engine crawlers |
