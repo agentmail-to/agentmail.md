@@ -49,17 +49,20 @@ that keeps `title`/`order` out of every file and in one place.
 ## Manifest (`pages.json`)
 
 An ordered list of the indexed pages. A page's **order is its position in the array**
-(reorder = move a line), and its display **title** is the `title` field:
+(reorder = move a line), its display **title** is the `title` field, and `related`
+(optional) is a list of slugs rendered as a `**Related:**` nav footer on that page's
+served copy (absolute links, so navigation survives the page being fetched alone):
 
 ```json
 [
-  { "slug": "signup", "title": "Sign up" },
-  { "slug": "core",   "title": "Core API" }
+  { "slug": "signup", "title": "Sign up",  "related": ["core"] },
+  { "slug": "core",   "title": "Core API", "related": ["signup", "webhooks", "websockets"] }
 ]
 ```
 
 A page file not listed here still builds — it's appended last with its slug as the
-title (with a warning). A manifest entry with no matching `.md` file is an error.
+title (with a warning). A manifest entry with no matching `.md` file — or a `related`
+slug that isn't an indexed page — is an error.
 
 ## Build
 
@@ -67,7 +70,7 @@ title (with a warning). A manifest entry with no matching `.md` file is an error
 
 | Output | Source | Purpose |
 | --- | --- | --- |
-| `index.md`, `<name>.md` | copied verbatim | the landing page + each indexed page |
+| `index.md`, `<name>.md` | copied (indexed pages get a `**Related:**` footer) | the landing page + each indexed page |
 | `llms.txt` | generated from indexed pages | [llms.txt](https://llmstxt.org) discovery index for LLM tooling |
 | `llms-full.txt` | generated from indexed pages | every page concatenated — one fetch for all of it |
 | `sitemap.xml` | root + indexed pages | for search-engine crawlers |

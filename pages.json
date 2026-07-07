@@ -1,6 +1,6 @@
 [
-  { "slug": "signup", "title": "Sign up" },
-  { "slug": "core", "title": "Core API" },
-  { "slug": "webhooks", "title": "Webhooks" },
-  { "slug": "websockets", "title": "WebSockets" }
+  { "slug": "signup", "title": "Sign up", "related": ["core"] },
+  { "slug": "core", "title": "Core API", "related": ["signup", "webhooks", "websockets"] },
+  { "slug": "webhooks", "title": "Webhooks", "related": ["websockets", "core"] },
+  { "slug": "websockets", "title": "WebSockets", "related": ["webhooks", "core"] }
 ]

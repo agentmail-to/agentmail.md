@@ -30,7 +30,9 @@ const NOT_SERVED = new Set(["README.md"]);
 // this array; its title is the `title` field. Pages omitted from the list are
 // appended last with their slug as the title.
 const MANIFEST = JSON.parse(readFileSync(join(ROOT, "pages.json"), "utf8"));
-const META = new Map(MANIFEST.map((entry, i) => [entry.slug, { title: entry.title, order: i }]));
+const META = new Map(
+  MANIFEST.map((entry, i) => [entry.slug, { title: entry.title, order: i, related: entry.related ?? [] }])
+);
 
 function parseFrontmatter(raw) {
   const m = raw.match(/^---\n([\s\S]*?)\n---\n?/);
@@ -64,19 +66,36 @@ function loadPages() {
         title: meta?.title ?? slug,
         description: data.description,
         order: meta ? meta.order : Number.MAX_SAFE_INTEGER,
+        related: meta?.related ?? [],
       };
     });
 
-  // Catch a stale manifest: an entry with no corresponding page file.
   const found = new Set(pages.map((p) => p.slug));
+
+  // Catch a stale manifest: an entry with no corresponding page file.
   for (const { slug } of MANIFEST) {
     if (!found.has(slug)) throw new Error(`pages.json lists "${slug}" but ${slug}.md does not exist`);
+  }
+
+  // Catch `related` references that don't point at an indexed page.
+  for (const p of pages) {
+    for (const rel of p.related) {
+      if (!found.has(rel)) throw new Error(`pages.json: "${p.slug}" relates to "${rel}", not an indexed page`);
+    }
   }
 
   return pages.sort((a, b) => a.order - b.order || a.slug.localeCompare(b.slug));
 }
 
 const url = (slug) => `${SITE.baseUrl}/${slug}`;
+
+// Nav footer appended to each indexed page's served copy — absolute links to its
+// `related` pages, so navigation survives the page being fetched alone.
+function relatedFooter(page, bySlug) {
+  if (!page.related.length) return "";
+  const links = page.related.map((slug) => `[${bySlug.get(slug).title}](${url(slug)})`).join(" · ");
+  return `\n\n---\n\n**Related:** ${links}\n`;
+}
 
 // Spec: https://llmstxt.org — H1 + blockquote summary, then an H2 link-list section.
 function buildLlms(pages) {
@@ -133,10 +152,16 @@ if (pages.length === 0) throw new Error("No indexed .md pages found at repo root
 rmSync(OUT, { recursive: true, force: true });
 mkdirSync(OUT, { recursive: true });
 
-// Copy all served markdown (indexed + curated pages) to the output root verbatim,
-// so /<name> -> /<name>.md.
+// Copy all served markdown to the output root (so /<name> -> /<name>.md). Indexed
+// pages get a Related nav footer appended; unindexed pages are copied verbatim.
+const byFile = new Map(pages.map((p) => [p.file, p]));
+const bySlug = new Map(pages.map((p) => [p.slug, p]));
 const served = readdirSync(ROOT).filter((f) => f.endsWith(".md") && !NOT_SERVED.has(f));
-for (const f of served) writeFileSync(join(OUT, f), readFileSync(join(ROOT, f), "utf8"));
+for (const f of served) {
+  const raw = readFileSync(join(ROOT, f), "utf8");
+  const footer = byFile.has(f) ? relatedFooter(byFile.get(f), bySlug) : "";
+  writeFileSync(join(OUT, f), footer ? raw.trimEnd() + footer : raw);
+}
 
 writeFileSync(join(OUT, "llms.txt"), buildLlms(pages));
 writeFileSync(join(OUT, "llms-full.txt"), buildLlmsFull(pages));
