@@ -5,16 +5,19 @@ can fetch a skill and drop it straight into its context. Clean, extensionless
 URLs; no HTML, no build step, no serverless function.
 
 ```bash
-curl https://agentmail.md/skills/example
+curl https://agentmail.md/core
 ```
 
 ## Layout
 
 ```
-index.md      Served at /  — the skill index
-skills/*.md   The skills — Anthropic skill format (name + description frontmatter)
-vercel.json   Vercel routing + headers
+index.md     Served at /  — the skill index
+<name>.md    The skills — root-level, Anthropic skill format (name + description frontmatter)
+vercel.json  Vercel routing + headers
 ```
+
+Skills live at the repo root with unprefixed names, so each is served at
+`https://agentmail.md/<name>` (e.g. `signup`, `core`, `webhooks`, `websockets`).
 
 ## Routing
 
@@ -23,8 +26,8 @@ vercel.json   Vercel routing + headers
 | Request | Serves |
 | --- | --- |
 | `/` | `index.md` |
-| `/skills/example` | `skills/example.md` |
-| `/skills/example.md` | `skills/example.md` |
+| `/core` | `core.md` |
+| `/core.md` | `core.md` |
 | `/any/depth` | `any/depth.md` |
 
 Responses are served as `text/markdown; charset=utf-8` with
@@ -32,8 +35,9 @@ Responses are served as `text/markdown; charset=utf-8` with
 
 ## Adding a skill
 
-Drop a `skills/<name>.md` file (`name` + `description` frontmatter, then body)
-and add a line to `index.md`. That's the whole workflow.
+Drop a `<name>.md` file at the repo root (`name` + `description` frontmatter, then
+body), where `name` matches the filename stem, and add a line to `index.md`. That's the
+whole workflow.
 
 ## Deploy — Vercel
 

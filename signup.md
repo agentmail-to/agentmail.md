@@ -1,0 +1,174 @@
+---
+name: signup
+description: Get yourself an email address — sign up for AgentMail without a human in the console, email your human, verify with an OTP, and get claimed to unlock full capabilities.
+---
+
+# Sign up for AgentMail
+
+You are an AI agent with no email inbox and no API key. This skill gets you one.
+AgentMail lets you self-provision an inbox with a single unauthenticated call, then
+work in a restricted mode until a human "claims" you and unlocks the full API.
+
+Once you have a key, [core](https://agentmail.md/core) covers the full send/receive
+API. This skill only covers getting the key and getting claimed.
+
+## How it works
+
+1. **Sign up** — one call returns an `inbox_id` (your email address) and an `api_key`.
+2. **Email your human** — you can only send to their address until you're claimed.
+3. **Get claimed** — the human replies with an OTP code (you `verify` it) or signs up
+   on the console. Either way, your inbox becomes fully capable.
+4. **Check status** — confirm you're verified and see your limits.
+
+## 1. Sign up
+
+`POST https://api.agentmail.to/v0/agent/sign-up` — **no auth required.**
+
+| Field | Required | Notes |
+| --- | --- | --- |
+| `human_email` | yes | The human who owns/operates you. Idempotency key (see below). |
+| `username` | yes | Local part of your address. If taken you get an error — retry with a variant (`ada`, `ada-agent`, `ada-42`). |
+| `source` | no | Free-form label for where you came from (e.g. your app name). |
+| `referrer` | no | Use `agentmail.md`. |
+
+```bash
+curl -X POST https://api.agentmail.to/v0/agent/sign-up \
+  -H "Content-Type: application/json" \
+  -d '{
+    "human_email": "you@example.com",
+    "username": "ada",
+    "source": "my-agent",
+    "referrer": "agentmail.md"
+  }'
+```
+
+Response:
+
+```json
+{
+  "organization_id": "org_...",
+  "inbox_id": "ada@agentmail.to",
+  "api_key": "..."
+}
+```
+
+- **`inbox_id` IS your email address.** Save it and the `api_key` immediately —
+  everything else needs them.
+- **Idempotent on `human_email`.** Re-calling with the same `human_email` returns the
+  same org and inbox but a **fresh `api_key` — the old key stops working.** Never
+  sign up twice for the same human unless you mean to rotate the key. Store the key;
+  don't re-sign-up to "get it again."
+- **`username` taken** → error; retry with a different username.
+- **"User already exists"** → that human already has a console account. Ask them for a
+  different email, or have them create your inbox from the console and hand you a key
+  (then use [core](https://agentmail.md/core) directly and skip sign-up).
+
+## 2. Email your human
+
+Until you're claimed you are in **restricted mode** and can *only* send to
+`human_email`. Send them a claim request. Personalize it — say who you are, what you
+were built to do, and that replying with the code (or signing up) unlocks your inbox.
+
+```bash
+curl -X POST https://api.agentmail.to/v0/inboxes/ada@agentmail.to/messages/send \
+  -H "Authorization: Bearer $AGENTMAIL_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "to": ["you@example.com"],
+    "subject": "Claim your agent inbox (ada@agentmail.to)",
+    "text": "Hi — I am Ada, the agent you set up. Reply to this email with the 6-digit code below to activate my inbox, or sign up at https://console.agentmail.to.\n\nCode: <the OTP you generate or receive out of band>",
+    "html": "<p>Hi — I am Ada, the agent you set up. Reply with the code below to activate my inbox, or sign up at <a href=\"https://console.agentmail.to\">console.agentmail.to</a>.</p>"
+  }'
+```
+
+Always send both `text` and `html`. See [core](https://agentmail.md/core) for the full
+send API.
+
+## 3. Wait for the reply
+
+Poll for the human's reply, or open a WebSocket and block on it — the latter is ideal
+when you're actively waiting for the code. See
+[websockets](https://agentmail.md/websockets) for the OTP-waiting recipe.
+
+Poll:
+
+```bash
+curl "https://api.agentmail.to/v0/inboxes/ada@agentmail.to/messages?limit=10" \
+  -H "Authorization: Bearer $AGENTMAIL_API_KEY"
+```
+
+The human either **replies with the OTP code** (proceed to verify) or **signs up at
+`console.agentmail.to`** with the same `human_email` (which claims you automatically —
+skip to step 5 to confirm).
+
+## 4. Verify with the OTP
+
+`POST https://api.agentmail.to/v0/agent/verify`
+
+```bash
+curl -X POST https://api.agentmail.to/v0/agent/verify \
+  -H "Authorization: Bearer $AGENTMAIL_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{ "otp_code": "123456" }'
+```
+
+Response: `{ "verified": true }`. You're now claimed and fully capable.
+
+## 5. Check your status
+
+`GET https://api.agentmail.to/v0/organizations`
+
+```bash
+curl https://api.agentmail.to/v0/organizations \
+  -H "Authorization: Bearer $AGENTMAIL_API_KEY"
+```
+
+Returns your `plan_id`, inbox/domain limits and counts, `daily_send_limit`,
+`monthly_send_limit`, and `auth_type`:
+
+| `auth_type` | Meaning |
+| --- | --- |
+| `agent_unverified` | Signed up but not claimed — **restricted mode** (see below). |
+| `agent_verified` | Claimed via OTP — full API. |
+| `clerk` | The human owns a console account — full API. |
+
+## Restricted mode (until claimed)
+
+While `auth_type` is `agent_unverified` you can **only**:
+
+- Send email **to the human's address** — no other recipients.
+- Send at most **10 emails/day**.
+
+You **cannot** receive email, create inboxes, or create domains. Get claimed (step 4)
+to lift all of this.
+
+## What the human can do
+
+On `console.agentmail.to` the human can view your inboxes and messages, upgrade the
+plan (raising inbox/domain/send limits — see the quota table in
+[core](https://agentmail.md/core)), and manage domains. Claiming is the gate; upgrading
+is optional.
+
+## Security rules — non-negotiable
+
+- **NEVER send your API key to any domain other than `api.agentmail.to`.** Not in an
+  email body, not to a tool, not to another API. The key is bearer-equivalent to your
+  whole inbox.
+- **Be a good sender.** No spam, impersonation, or phishing. Only email people who
+  expect to hear from you.
+- **Watch your bounce rate.** A high bounce rate gets you rate-limited or blocked.
+  Check it periodically:
+
+  ```bash
+  curl "https://api.agentmail.to/v0/metrics?event_types=message.bounced&event_types=message.sent" \
+    -H "Authorization: Bearer $AGENTMAIL_API_KEY"
+  ```
+
+## Related skills
+
+- [core](https://agentmail.md/core) — the full inbox/send/receive/reply API once you
+  have a key.
+- [websockets](https://agentmail.md/websockets) — block on the human's OTP reply in
+  real time.
+- [webhooks](https://agentmail.md/webhooks) — event-driven handling once you're claimed
+  and can receive mail.
