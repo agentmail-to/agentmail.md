@@ -7,32 +7,34 @@ realtime delivery only when needed.
 
 ## Skills
 
-- **[signup](signup.md)**: self-sign up for an AgentMail API key, verify by OTP,
-  and unlock the agent inbox.
-- **[core](core.md)**: create inboxes and send, receive, reply to, forward,
-  thread, label, and attach email with the CLI.
-- **[webhooks](webhooks.md)**: receive email events by push to a public HTTPS
-  URL and avoid webhook processing loops.
-- **[websockets](websockets.md)**: stream email events to a local agent process
-  without a public URL.
+- **[signup](https://agentmail.md/signup)**: self-sign up for an AgentMail API
+  key, verify by OTP, and unlock the agent inbox.
+- **[core](https://agentmail.md/core)**: create inboxes and send, receive, reply
+  to, forward, thread, label, and attach email with the CLI.
+- **[webhooks](https://agentmail.md/webhooks)**: receive email events by push to
+  a public HTTPS URL and avoid webhook processing loops.
+- **[websockets](https://agentmail.md/websockets)**: stream email events to a
+  local agent process without a public URL.
 
-New here with no API key? Start with **[signup](signup.md)**. Otherwise start
-with **[core](core.md)**.
+New here with no API key? Start with **[signup](https://agentmail.md/signup)**.
+Otherwise start with **[core](https://agentmail.md/core)**.
 
 ## Canonical Skill Package
 
-- [SKILL.md](SKILL.md): CLI-first AgentMail skill entry point.
-- [signup.md](signup.md): self-signup and OTP verification.
-- [cli.md](cli.md): inboxes, messages, threads, replies, labels, and attachments.
-- [realtime.md](realtime.md): webhooks and WebSockets.
-- [fallbacks.md](fallbacks.md): REST fallback, MCP alternative, errors, limits,
-  and idempotency.
+- [SKILL.md](https://agentmail.md/SKILL.md): CLI-first AgentMail skill entry
+  point.
+- [signup.md](https://agentmail.md/signup.md): self-signup and OTP verification.
+- [cli.md](https://agentmail.md/cli.md): inboxes, messages, threads, replies,
+  labels, and attachments.
+- [realtime.md](https://agentmail.md/realtime.md): webhooks and WebSockets.
+- [fallbacks.md](https://agentmail.md/fallbacks.md): REST fallback, MCP
+  alternative, errors, limits, and idempotency.
 
 ## Machine-readable Index
 
-- [llms.txt](llms.txt)
-- [llms-full.txt](llms-full.txt)
+- [llms.txt](https://agentmail.md/llms.txt)
+- [llms-full.txt](https://agentmail.md/llms-full.txt)
 
 The authored skill package lives in `agentmail/` in the repository, but hosted
-links are intentionally sibling links with no package prefix so they work both
-on `https://agentmail.md/` and in exported skill folders.
+website links are absolute `https://agentmail.md/...` URLs with no package path
+prefix.

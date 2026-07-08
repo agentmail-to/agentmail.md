@@ -89,7 +89,17 @@ function readSitePages() {
     });
 }
 
-function validateMarkdownLinks(file, raw, allowedRelativeTargets) {
+function normalizeHostedPath(path) {
+  if (path === "" || path === "/") return "index.md";
+
+  const stripped = path.startsWith("/") ? path.slice(1) : path;
+  if (stripped === "") return "index.md";
+  if (stripped.endsWith("/")) return `${stripped.slice(0, -1)}.md`;
+  if (/\.[A-Za-z0-9]+$/.test(stripped)) return stripped;
+  return `${stripped}.md`;
+}
+
+function validateSkillLinks(file, raw, allowedRelativeTargets) {
   for (const match of raw.matchAll(/\[[^\]]+\]\(([^)]+)\)/g)) {
     const target = match[1].split("#")[0];
     if (!target || /^(https?:|mailto:)/.test(target)) continue;
@@ -97,6 +107,37 @@ function validateMarkdownLinks(file, raw, allowedRelativeTargets) {
     if (target.includes("/")) throw new Error(`${file}: avoid path prefixes in local links: ${match[1]}`);
     if (!allowedRelativeTargets.has(target)) throw new Error(`${file}: missing relative link target ${match[1]}`);
   }
+}
+
+function validateWebsiteLinks(file, raw, manifest, allowedHostedTargets) {
+  for (const match of raw.matchAll(/\[[^\]]+\]\(([^)]+)\)/g)) {
+    const target = match[1].split("#")[0];
+    if (!target || /^mailto:/.test(target)) continue;
+
+    if (target.startsWith(manifest.baseUrl)) {
+      const path = target.slice(manifest.baseUrl.length);
+      const normalized = normalizeHostedPath(path);
+      if (!allowedHostedTargets.has(normalized)) {
+        throw new Error(`${file}: hosted URL does not resolve to generated file: ${match[1]}`);
+      }
+      continue;
+    }
+
+    if (/^https?:/.test(target)) continue;
+
+    throw new Error(`${file}: website links must be absolute URLs: ${match[1]}`);
+  }
+}
+
+function toHostedLinks(raw, manifest, allowedRelativeTargets) {
+  return raw.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (full, label, target) => {
+    const [path, hash = ""] = target.split("#");
+    if (!path || /^(https?:|mailto:)/.test(path)) return full;
+    if (path.startsWith("/") || path.includes("/") || !allowedRelativeTargets.has(path)) return full;
+
+    const suffix = hash ? `#${hash}` : "";
+    return `[${label}](${manifest.baseUrl}/${path}${suffix})`;
+  });
 }
 
 function buildLlms(manifest, pages) {
@@ -172,8 +213,8 @@ for (const file of siteFiles) {
 const skillAllowedTargets = new Set(pageFiles);
 const siteAllowedTargets = new Set([...pageFiles, ...siteFiles, "llms.txt", "llms-full.txt"]);
 
-for (const page of pages) validateMarkdownLinks(`agentmail/${page.file}`, page.raw, skillAllowedTargets);
-for (const page of sitePages) validateMarkdownLinks(`site/${page.file}`, page.raw, siteAllowedTargets);
+for (const page of pages) validateSkillLinks(`agentmail/${page.file}`, page.raw, skillAllowedTargets);
+for (const page of sitePages) validateWebsiteLinks(`site/${page.file}`, page.raw, manifest, siteAllowedTargets);
 
 rmSync(OUT, { recursive: true, force: true });
 mkdirSync(OUT, { recursive: true });
@@ -182,12 +223,17 @@ for (const page of sitePages) {
   writeFileSync(join(OUT, page.file), page.raw);
 }
 
-for (const page of pages) {
+const hostedPages = pages.map((page) => ({
+  ...page,
+  raw: toHostedLinks(page.raw, manifest, skillAllowedTargets),
+}));
+
+for (const page of hostedPages) {
   writeFileSync(join(OUT, page.file), page.raw);
 }
 
 writeFileSync(join(OUT, "llms.txt"), buildLlms(manifest, pages));
-writeFileSync(join(OUT, "llms-full.txt"), buildLlmsFull(manifest, pages));
+writeFileSync(join(OUT, "llms-full.txt"), buildLlmsFull(manifest, hostedPages));
 writeFileSync(join(OUT, "sitemap.xml"), buildSitemap(manifest, pages, sitePages));
 writeFileSync(join(OUT, "robots.txt"), buildRobots(manifest));
 

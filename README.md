@@ -31,8 +31,8 @@ local/           Generated local package
 
 `agentmail/SKILL.md` is the source of truth for the skill entry point. Supporting
 files should stay terse, operational, and agent-oriented. `site/*.md` files are
-website pages and should link to hosted files as siblings, such as `SKILL.md` and
-`cli.md`, without `agentmail/` path prefixes.
+website pages and should link to hosted files with absolute
+`https://agentmail.md/...` URLs, without `agentmail/` path prefixes.
 
 ## Build
 
@@ -44,14 +44,16 @@ This writes `public/`:
 
 | Output | Source | Purpose |
 | --- | --- | --- |
-| `SKILL.md`, `*.md` | copied from `agentmail/` | hosted skill package |
+| `SKILL.md`, `*.md` | generated from `agentmail/` with absolute hosted links | hosted skill package |
 | `index.md`, website topic pages | copied from `site/` | website navigation and compatibility pages |
 | `llms.txt` | generated from `manifest.json` | discovery index |
 | `llms-full.txt` | generated from `manifest.json` and markdown files | one-file full reference |
 | `sitemap.xml`, `robots.txt` | generated | crawler support |
 
 Vercel serves `/` from `index.md`; extensionless paths such as `/cli` are
-rewritten to `/cli.md`.
+rewritten to `/cli.md`. Hosted markdown uses absolute `https://agentmail.md/...`
+links. The canonical `agentmail/` source uses relative links so it remains
+copyable into agent runtimes.
 
 ## Local Export
 
