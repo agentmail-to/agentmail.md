@@ -61,9 +61,8 @@ npm run build:local
 
 This runs the hosted build, then writes `local/` as a self-contained skill
 package. Website pages from `site/` are omitted; `SKILL.md` is the package entry
-point. Links to `https://agentmail.md/<file>` become relative file links, the
-root `https://agentmail.md` reference is preserved, and the self-signup
-`--referrer agentmail.md` value can be changed:
+point. Links to `https://agentmail.md/<file>` become relative file links, and
+the self-signup `--referrer agentmail.md` value can be changed:
 
 ```bash
 npm run build:local -- --referrer=hermes-agent --out=local

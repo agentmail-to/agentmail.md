@@ -1,7 +1,6 @@
 // Build a local copy of the AgentMail skill package adapted for offline use as
 // a plain folder of .md files:
 //   - https://agentmail.md/<file> links  ->  relative file paths (core.md, llms.txt)
-//   - the root https://agentmail.md reference is preserved
 //   - the signup `--referrer agentmail.md` value is set from --referrer
 // agentmail.to links (the API and docs) are left untouched.
 //
@@ -31,8 +30,7 @@ if (!existsSync(SRC)) {
 const MANIFEST = JSON.parse(readFileSync(MANIFEST_FILE, "utf8"));
 const LOCAL_FILES = [...MANIFEST.pages.map((page) => page.file), "llms-full.txt", "llms.txt"];
 
-// Rewrite generated absolute file links to relative local file paths. Keep the
-// root site URL as the hosted reference for copied skill packages.
+// Rewrite generated absolute file links to relative local file paths.
 function toLocalLinks(content) {
   return content.replace(/https:\/\/agentmail\.md(\/[A-Za-z0-9._\/-]*)?/g, (_, rest) => {
     if (rest == null || rest === "" || rest === "/") return "https://agentmail.md";

@@ -44,12 +44,10 @@ No API key yet? Start with [signup.md](signup.md).
 
 ## References
 
-- [agentmail.md](https://agentmail.md): this level-one reference.
+- [AgentMail](https://agentmail.to): product landing page.
 - [Console](https://console.agentmail.to): create human-managed API keys and
   manage the account.
 - [Docs](https://docs.agentmail.to): full product documentation.
-- [API reference](https://docs.agentmail.to/api-reference): REST and schema
-  details.
 
 ## Verify
 
