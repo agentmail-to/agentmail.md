@@ -1,6 +1,6 @@
 // Build a local copy of the AgentMail skill package adapted for offline use as
 // a plain folder of .md files:
-//   - https://agentmail.md/... links  ->  relative file paths (cli.md, llms.txt)
+//   - https://agentmail.md/... links  ->  relative file paths (core.md, llms.txt)
 //   - the signup `referrer` value (agentmail.md on the web) is set from --referrer
 // agentmail.to links (the API and docs) are left untouched.
 //

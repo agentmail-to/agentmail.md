@@ -1,11 +1,12 @@
-# AgentMail CLI Workflows
+# AgentMail Core
 
 Use the `agentmail` CLI for day-to-day AgentMail work. This page covers the
 commands an agent needs most: create inboxes, send and receive messages, load
 threads, reply, forward, label, and handle attachments.
 
 Need a key first? Start with [signup.md](signup.md). Need realtime events? Use
-[realtime.md](realtime.md).
+[webhooks.md](webhooks.md) for public servers or [websockets.md](websockets.md)
+for local agent processes.
 
 ## Setup
 

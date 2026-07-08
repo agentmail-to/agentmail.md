@@ -84,5 +84,5 @@ agentmail inboxes:messages send \
   --format json
 ```
 
-Continue with [cli.md](cli.md) for inbox, message, thread, label, and attachment
+Continue with [core.md](core.md) for inbox, message, thread, label, and attachment
 workflows.

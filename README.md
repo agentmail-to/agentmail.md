@@ -12,16 +12,14 @@ runtime, including the later Hermes `skills/email/agentmail/` PR.
 ```text
 agentmail/
   SKILL.md       Main skill entry point
-  cli.md         Inbox, message, thread, label, and attachment workflows
+  core.md        Inbox, message, thread, label, and attachment workflows
   signup.md      CLI self-signup and OTP verification
-  realtime.md    Webhook and WebSocket delivery guidance
+  webhooks.md    Public HTTPS webhook delivery guidance
+  websockets.md  Local realtime WebSocket delivery guidance
   fallbacks.md   REST/MCP alternatives, errors, limits, idempotency
   manifest.json  Hosted index metadata
 site/
   index.md       Website landing page served at /
-  core.md        Compatibility page for the previous /core topic
-  webhooks.md    Compatibility page for the previous /webhooks topic
-  websockets.md  Compatibility page for the previous /websockets topic
 scripts/
   build.js       Copies agentmail/ into public/ and generates indexes
   build-local.js Exports a local skill package
@@ -45,13 +43,13 @@ This writes `public/`:
 | Output | Source | Purpose |
 | --- | --- | --- |
 | `SKILL.md`, `*.md` | generated from `agentmail/` with absolute hosted links | hosted skill package |
-| `index.md`, website topic pages | copied from `site/` | website navigation and compatibility pages |
+| `index.md` | copied from `site/` | website landing page |
 | `llms.txt` | generated from `manifest.json` | discovery index |
 | `llms-full.txt` | generated from `manifest.json` and markdown files | one-file full reference |
 | `sitemap.xml`, `robots.txt` | generated | crawler support |
 
-Vercel serves `/` from `index.md`; extensionless paths such as `/cli` are
-rewritten to `/cli.md`. Hosted markdown uses absolute `https://agentmail.md/...`
+Vercel serves `/` from `index.md`; extensionless paths such as `/core` are
+rewritten to `/core.md`. Hosted markdown uses absolute `https://agentmail.md/...`
 links. The canonical `agentmail/` source uses relative links so it remains
 copyable into agent runtimes.
 

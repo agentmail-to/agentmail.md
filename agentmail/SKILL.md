@@ -46,79 +46,18 @@ agentmail inboxes list --format json
 Prefer `AGENTMAIL_API_KEY` over `--api-key` so secrets stay out of shell
 history.
 
-## How to Run
+## Choose a Guide
 
-CLI commands follow this pattern:
+- [signup.md](signup.md): get an API key and inbox with CLI self-signup.
+- [core.md](core.md): create inboxes, send mail, read messages, handle threads,
+  reply, forward, label, and work with attachments.
+- [webhooks.md](webhooks.md): receive AgentMail events on a public HTTPS server.
+- [websockets.md](websockets.md): wait for realtime inbound mail from a local
+  agent process.
+- [fallbacks.md](fallbacks.md): use REST or MCP only when the CLI is not enough.
 
-```bash
-agentmail [resource] <command> [flags...]
-agentmail inboxes:messages send --inbox-id agent@agentmail.to --to user@example.com --subject "Hello" --text "Hi"
-```
-
-Use `--format json` whenever another command or script needs IDs from the
+Use `--format json` whenever another command or script needs IDs from CLI
 output. Use `agentmail <resource> <command> --help` before guessing flags.
-
-## Quick Start
-
-If there is no API key, sign up and verify first:
-
-```bash
-agentmail agent sign-up \
-  --human-email you@example.com \
-  --username my-agent \
-  --source agentmail-cli \
-  --referrer agentmail.md \
-  --format json
-
-export AGENTMAIL_API_KEY="am_..."
-agentmail agent verify --otp-code 123456
-```
-
-Then create or reuse an inbox:
-
-```bash
-agentmail inboxes create \
-  --username support \
-  --display-name "Support Agent" \
-  --client-id support-agent-primary \
-  --format json
-```
-
-Send mail:
-
-```bash
-agentmail inboxes:messages send \
-  --inbox-id support@agentmail.to \
-  --to customer@example.com \
-  --subject "Hello" \
-  --text "Plain-text body." \
-  --html "<p>Plain-text body.</p>" \
-  --label outreach \
-  --format json
-```
-
-Read and reply:
-
-```bash
-agentmail inboxes:messages list --inbox-id support@agentmail.to --label unread --format json
-agentmail inboxes:messages retrieve --inbox-id support@agentmail.to --message-id <message_id> --format json
-agentmail inboxes:threads retrieve --inbox-id support@agentmail.to --thread-id <thread_id> --format json
-agentmail inboxes:messages reply --inbox-id support@agentmail.to --message-id <message_id> --text "Thanks." --format json
-agentmail inboxes:messages update --inbox-id support@agentmail.to --message-id <message_id> --add-label handled --remove-label unread
-```
-
-## Reference Files
-
-- [signup.md](signup.md): self-signup, OTP verification, and restricted mode.
-- [cli.md](cli.md): inbox, message, thread, label, attachment, reply, and
-  forward workflows.
-- [realtime.md](realtime.md): when to use webhooks or WebSockets, plus loop
-  prevention rules.
-- [fallbacks.md](fallbacks.md): REST fallback, MCP alternative, errors, limits,
-  idempotency, and rate-limit behavior.
-
-Read only the files needed for the task. The CLI is the default path even when
-REST and MCP are available.
 
 ## Pitfalls
 
@@ -143,8 +82,6 @@ REST and MCP are available.
 
 ```bash
 agentmail inboxes list --format json
-agentmail inboxes create --username agentmail-smoke --client-id agentmail-smoke --format json
 ```
 
-If the second command returns an inbox instead of an auth error, the CLI and API
-key work.
+If that returns inboxes instead of an auth error, the CLI and API key work.
