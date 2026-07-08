@@ -1,9 +1,8 @@
 # AgentMail Agent Reference
 
-This site hosts markdown reference files for agents using AgentMail. The goal is
-to give coding agents the minimum operational context needed to install the
-`agentmail` CLI, create or use an inbox, send and receive mail, and choose
-realtime delivery only when needed.
+This site hosts the level-one AgentMail reference for coding agents: enough to
+install the CLI, get an inbox, send and receive mail, and choose realtime
+delivery when needed.
 
 ## Guides
 
@@ -21,8 +20,7 @@ Otherwise start with **[core](https://agentmail.md/core)**.
 
 ## Reference
 
-- [SKILL.md](https://agentmail.md/SKILL.md): CLI-first AgentMail skill entry
-  point.
-- [mcp.md](https://agentmail.md/mcp.md): AgentMail MCP integration.
+- [SKILL.md](https://agentmail.md/SKILL.md): skill entry point.
+- [mcp.md](https://agentmail.md/mcp.md): MCP integration.
 - [llms.txt](https://agentmail.md/llms.txt)
 - [llms-full.txt](https://agentmail.md/llms-full.txt)
