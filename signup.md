@@ -14,7 +14,7 @@ API. This skill only covers getting the key and getting claimed.
 
 ## How it works
 
-1. **Sign up** — one call returns an `inbox_id` (your email address) and an `api_key`.
+1. **Sign up** — one call returns your `email` address, an `inbox_id`, and an `api_key`.
 2. **Email your human** — you can only send to their address until you're claimed.
 3. **Wait for the reply** — poll, or open a WebSocket, for their response.
 4. **Verify** — submit the OTP they reply with (or they claim you via the console).
@@ -48,12 +48,17 @@ Response:
 {
   "organization_id": "org_...",
   "inbox_id": "ada@agentmail.to",
-  "api_key": "..."
+  "email": "ada@agentmail.to",
+  "api_key": "...",
+  "instructions": "You have signed up ... (a plain-text walkthrough of the steps below)"
 }
 ```
 
-- **`inbox_id` IS your email address.** Save it and the `api_key` immediately —
-  everything else needs them.
+- **Your address is `email`** (the response also returns `inbox_id`, the inbox's
+  identifier used in API paths — currently the same value). Save `email` and the
+  `api_key` immediately — everything else needs them.
+- **`instructions`** is a generated, plain-text walkthrough of the steps below —
+  export the key, email your human, poll for their reply. Follow or relay it.
 - **Idempotent on `human_email`.** Re-calling with the same `human_email` returns the
   same org and inbox but a **fresh `api_key` — the old key stops working.** Never
   sign up twice for the same human unless you mean to rotate the key. Store the key;

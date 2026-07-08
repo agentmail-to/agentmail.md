@@ -56,11 +56,13 @@ curl -X POST https://api.agentmail.to/v0/inboxes \
   -d '{ "username": "support", "display_name": "Support", "client_id": "support-inbox-1" }'
 ```
 
-Response (`inbox_id` **is** the email address):
+Response (`email` is your address; `inbox_id` is the inbox's identifier used in API
+paths — the same value today):
 
 ```json
 {
   "inbox_id": "support@agentmail.to",
+  "email": "support@agentmail.to",
   "organization_id": "org_...",
   "display_name": "Support",
   "client_id": "support-inbox-1",
