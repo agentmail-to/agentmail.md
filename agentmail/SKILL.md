@@ -38,9 +38,8 @@ No API key yet? Start with [signup.md](signup.md).
   history.
 - Use stable `client_id` values for retried create operations.
 - Prefer `extracted_text` or `extracted_html` for LLM input when present.
-- Subscribe or react to `message.received` for inbound loops; do not process
-  your own outbound lifecycle events as new work.
-- Never send `AGENTMAIL_API_KEY` anywhere except AgentMail API or MCP endpoints.
+- Subscribe or react to `message.received` for inbound loops.
+- Keep `AGENTMAIL_API_KEY` scoped to AgentMail API and MCP endpoints.
 
 ## References
 

@@ -27,15 +27,13 @@ Verify with the OTP sent to the human email:
 agentmail agent verify --otp-code 123456
 ```
 
-## Rules
+## Notes
 
-- Use a real human email address; placeholder domains may be rejected.
+- Use a real human email address for `--human-email`.
 - `human_email` is the signup idempotency key, but signing up again with the
   same email rotates the API key.
 - Before verification, the account has one inbox, 10 sends/day, and can only
   send to the signup human email.
-- If the human already has a console account, use a different email or have them
-  create an API key in `https://console.agentmail.to`.
 
 ## First Check
 

@@ -39,12 +39,9 @@ Subscribe frame:
 { "type": "subscribe", "event_types": ["message.received"], "inbox_ids": ["agent@agentmail.to"] }
 ```
 
-Omit `inbox_ids` and `pod_ids` to subscribe to the API key scope. Do not send
-empty arrays when you mean "all".
+Omit `inbox_ids` and `pod_ids` to subscribe to the API key scope.
 
 ## Loop Rules
 
 - Dedupe every event by `event_id`.
-- Ignore mail from your own inbox address unless self-addressed workflows are
-  intentional.
 - Reconnect with backoff and resubscribe after reconnecting.
