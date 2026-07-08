@@ -29,9 +29,9 @@
       "description": "Stream AgentMail events to a local agent process."
     },
     {
-      "file": "fallbacks.md",
-      "title": "Fallbacks and Limits",
-      "description": "Use REST or MCP only when the CLI is not the right integration path."
+      "file": "mcp.md",
+      "title": "MCP",
+      "description": "Use AgentMail through MCP when the harness expects MCP tools."
     }
   ]
 }

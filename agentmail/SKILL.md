@@ -54,7 +54,7 @@ history.
 - [webhooks.md](webhooks.md): receive AgentMail events on a public HTTPS server.
 - [websockets.md](websockets.md): wait for realtime inbound mail from a local
   agent process.
-- [fallbacks.md](fallbacks.md): use REST or MCP only when the CLI is not enough.
+- [mcp.md](mcp.md): use AgentMail through MCP when the harness expects MCP tools.
 
 Use `--format json` whenever another command or script needs IDs from CLI
 output. Use `agentmail <resource> <command> --help` before guessing flags.

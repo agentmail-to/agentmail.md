@@ -16,7 +16,7 @@ agentmail/
   signup.md      CLI self-signup and OTP verification
   webhooks.md    Public HTTPS webhook delivery guidance
   websockets.md  Local realtime WebSocket delivery guidance
-  fallbacks.md   REST/MCP alternatives, errors, limits, idempotency
+  mcp.md         MCP integration guidance
   manifest.json  Hosted index metadata
 site/
   index.md       Website landing page served at /

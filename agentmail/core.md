@@ -192,3 +192,36 @@ agentmail inboxes:messages get-raw \
 
 When sending attachments through REST, provide exactly one of base64 `content`
 or `url`. Do not include both.
+
+## REST and Limits
+
+Use REST only when the CLI is unavailable or missing a required operation.
+
+```bash
+curl https://api.agentmail.to/v0/inboxes \
+  -H "Authorization: Bearer $AGENTMAIL_API_KEY"
+```
+
+Base URL: `https://api.agentmail.to/v0`. EU region:
+`https://api.agentmail.eu/v0`.
+
+Operational rules:
+
+- Self-signup is idempotent by `human_email`, but each repeat signup rotates the
+  API key.
+- Create operations such as inboxes and webhooks support `client_id`; use a
+  stable value for resources the agent may retry creating.
+- Message send idempotency belongs in the `Idempotency-Key` request header when
+  using REST. Do not put idempotency keys in the JSON body.
+- Filtered list/search requests cap `limit` at 100.
+- `429` means rate limited; honor `Retry-After` and back off.
+
+Error bodies use JSON with `name` and `message`. Validation errors include an
+`errors` array.
+
+| Plan | Inboxes | Domains | Sends/day | Sends/month |
+| --- | --- | --- | --- | --- |
+| Agent unverified | 1 | 0 | 10 | - |
+| Free | 3 | 0 | 100 | - |
+| Developer | 10 | 10 | 1,000 | 10,000 |
+| Startup | 150 | 150 | 15,000 | 150,000 |

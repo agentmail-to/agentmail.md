@@ -23,7 +23,6 @@ Otherwise start with **[core](https://agentmail.md/core)**.
 
 - [SKILL.md](https://agentmail.md/SKILL.md): CLI-first AgentMail skill entry
   point.
-- [fallbacks.md](https://agentmail.md/fallbacks.md): REST fallback, MCP
-  alternative, errors, limits, and idempotency.
+- [mcp.md](https://agentmail.md/mcp.md): AgentMail MCP integration.
 - [llms.txt](https://agentmail.md/llms.txt)
 - [llms-full.txt](https://agentmail.md/llms-full.txt)
