@@ -18,10 +18,7 @@ Store the returned `secret` immediately.
 
 ## Handle
 
-AgentMail webhooks use Svix-style headers: `svix-id`, `svix-timestamp`, and
-`svix-signature`.
-
-Handler pattern:
+Headers: `svix-id`, `svix-timestamp`, `svix-signature`.
 
 1. Verify the raw request body with the webhook secret.
 2. Dedupe by `svix-id` or `event_id`.
@@ -29,5 +26,5 @@ Handler pattern:
 4. Process asynchronously.
 5. For `message.received`, load the thread with the CLI and reply if needed.
 
-For automatic agents, act on `message.received` only. Outbound mail emits
-`message.sent` and delivery events; treating those as inbound work creates loops.
+Act on `message.received` only. Treating `message.sent` or delivery events as
+inbound work creates loops.

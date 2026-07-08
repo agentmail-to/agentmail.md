@@ -1,18 +1,15 @@
 # AgentMail Agent Reference
 
-Level-one AgentMail reference for coding agents: enough to install the CLI, get
-an inbox, send and receive mail, and choose realtime delivery when needed.
-
 ## Guides
 
 - **[signup](https://agentmail.md/signup)**: self-sign up for an AgentMail API
-  key, verify by OTP, and unlock the agent inbox.
-- **[core](https://agentmail.md/core)**: create inboxes and send, receive, reply
-  to, forward, thread, label, and attach email with the CLI.
+  key and verify by OTP.
+- **[core](https://agentmail.md/core)**: inboxes, messages, threads, labels, and
+  attachments with the CLI.
 - **[webhooks](https://agentmail.md/webhooks)**: receive email events by push to
-  a public HTTPS URL and avoid webhook processing loops.
+  a public HTTPS URL.
 - **[websockets](https://agentmail.md/websockets)**: stream email events to a
-  local agent process without a public URL.
+  local agent process.
 
 New here with no API key? Start with **[signup](https://agentmail.md/signup)**.
 Otherwise start with **[core](https://agentmail.md/core)**.

@@ -1,10 +1,9 @@
 # AgentMail Core
 
-Use this for the common CLI path: create an inbox, send mail, read incoming
-mail, reply in threads, label work, and fetch attachments.
-
-Need a key first? Use [signup.md](signup.md). Need push or streaming delivery?
-Use [webhooks.md](webhooks.md) or [websockets.md](websockets.md).
+Common CLI path: create inboxes, send mail, read incoming mail, reply in
+threads, label work, and fetch attachments. Need a key first? Use
+[signup.md](signup.md). Need realtime delivery? Use [webhooks.md](webhooks.md)
+or [websockets.md](websockets.md).
 
 ## Setup
 
@@ -26,8 +25,8 @@ agentmail inboxes create \
 agentmail inboxes retrieve --inbox-id support@agentmail.to --format json
 ```
 
-Omit `domain` to use `@agentmail.to`. Custom domains must be verified first.
-Use a stable `client_id` when a create command may be retried.
+Omit `domain` to use `@agentmail.to`. Use stable `client_id` values for
+retried create commands.
 
 ## Send
 
@@ -78,8 +77,7 @@ agentmail inboxes:messages forward \
 
 ## Labels
 
-Use labels as lightweight agent state, such as `unread`, `handled`, or
-`needs-review`.
+Use labels as lightweight state: `unread`, `handled`, `needs-review`.
 
 ```bash
 agentmail inboxes:messages update \
@@ -100,9 +98,8 @@ agentmail inboxes:messages get-attachment \
   --format json
 ```
 
-Fetch the returned download URL before it expires. Use
-`agentmail inboxes:messages send --help` before constructing attachment-send
-commands.
+Fetch the returned download URL before it expires. Check
+`agentmail inboxes:messages send --help` for attachment-send flags.
 
 ## REST Notes
 
@@ -113,8 +110,7 @@ curl https://api.agentmail.to/v0/inboxes \
   -H "Authorization: Bearer $AGENTMAIL_API_KEY"
 ```
 
-Base URL: `https://api.agentmail.to/v0`. EU region:
-`https://api.agentmail.eu/v0`.
+Base URLs: `https://api.agentmail.to/v0`, `https://api.agentmail.eu/v0`.
 
 Error bodies include `name` and `message`; validation errors include `errors`.
 For `429`, honor `Retry-After` and back off.

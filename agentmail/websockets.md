@@ -1,8 +1,7 @@
 # AgentMail WebSockets
 
-Use WebSockets when a local agent process needs realtime inbound mail. Use the
-CLI for normal inbox, send, reply, label, and attachment work after an event
-arrives.
+Use WebSockets when a local agent process needs realtime inbound mail. After an
+event arrives, use the CLI for inbox, send, reply, label, and attachment work.
 
 ## Python
 
@@ -21,7 +20,7 @@ with client.websockets.connect() as socket:
             print(event.message.subject, event.message.from_)
 ```
 
-## Raw Protocol
+## Raw
 
 ```text
 wss://ws.agentmail.to/v0?api_key=$AGENTMAIL_API_KEY
@@ -39,7 +38,7 @@ Subscribe frame:
 { "type": "subscribe", "event_types": ["message.received"], "inbox_ids": ["agent@agentmail.to"] }
 ```
 
-Omit `inbox_ids` and `pod_ids` to subscribe to the API key scope.
+Omit `inbox_ids` and `pod_ids` for the API key scope.
 
 ## Loop Rules
 

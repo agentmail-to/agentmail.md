@@ -1,7 +1,7 @@
 # AgentMail Self-Signup
 
-Use this when the agent does not have an AgentMail API key. A human still has to
-receive and provide the OTP.
+Use this when the agent does not have an AgentMail API key. A human must receive
+and provide the OTP.
 
 ## Sign Up
 
@@ -15,13 +15,13 @@ agentmail agent sign-up \
   --format json
 ```
 
-Save `api_key` and export it:
+Export the returned `api_key`:
 
 ```bash
 export AGENTMAIL_API_KEY="am_..."
 ```
 
-Verify with the OTP sent to the human email:
+Verify with the OTP:
 
 ```bash
 agentmail agent verify --otp-code 123456
