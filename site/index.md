@@ -1,8 +1,7 @@
 # AgentMail Agent Reference
 
-This site hosts the level-one AgentMail reference for coding agents: enough to
-install the CLI, get an inbox, send and receive mail, and choose realtime
-delivery when needed.
+Level-one AgentMail reference for coding agents: enough to install the CLI, get
+an inbox, send and receive mail, and choose realtime delivery when needed.
 
 ## Guides
 
