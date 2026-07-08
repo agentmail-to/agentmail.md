@@ -1,7 +1,8 @@
 // Build a local copy of the AgentMail skill package adapted for offline use as
 // a plain folder of .md files:
-//   - https://agentmail.md/... links  ->  relative file paths (core.md, llms.txt)
-//   - the signup `referrer` value (agentmail.md on the web) is set from --referrer
+//   - https://agentmail.md/<file> links  ->  relative file paths (core.md, llms.txt)
+//   - the root https://agentmail.md reference is preserved
+//   - the signup `--referrer agentmail.md` value is set from --referrer
 // agentmail.to links (the API and docs) are left untouched.
 //
 // Run: `npm run build:local -- [--out=local] [--referrer=<value>]`
@@ -30,21 +31,20 @@ if (!existsSync(SRC)) {
 const MANIFEST = JSON.parse(readFileSync(MANIFEST_FILE, "utf8"));
 const LOCAL_FILES = [...MANIFEST.pages.map((page) => page.file), "llms-full.txt", "llms.txt"];
 
-// Rewrite absolute agentmail.md links to relative local file paths.
+// Rewrite generated absolute file links to relative local file paths. Keep the
+// root site URL as the hosted reference for copied skill packages.
 function toLocalLinks(content) {
   return content.replace(/https:\/\/agentmail\.md(\/[A-Za-z0-9._\/-]*)?/g, (_, rest) => {
-    if (rest == null) return "."; // bare domain
+    if (rest == null || rest === "" || rest === "/") return "https://agentmail.md";
     const path = rest.slice(1); // strip leading slash
-    if (path === "") return "SKILL.md"; // site root -> the skill entry point
     if (/\.(md|txt|xml)$/.test(path)) return path; // already a filename
     return `${path}.md`; // extensionless slug -> file
   });
 }
 
-// After the URLs are gone, the only remaining bare `agentmail.md` is the referrer
-// value — set it to the caller's --referrer.
+// Set only the signup referrer value; do not rewrite the hosted reference URL.
 function setReferrer(content) {
-  return content.replaceAll("agentmail.md", REFERRER);
+  return content.replaceAll("--referrer agentmail.md", `--referrer ${REFERRER}`);
 }
 
 rmSync(OUT, { recursive: true, force: true });

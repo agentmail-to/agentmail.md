@@ -12,6 +12,8 @@ an agent-owned address.
 Use the `agentmail` CLI first. Use MCP only when the harness expects MCP tools,
 and use REST only when the CLI is missing a required operation.
 
+Hosted reference: [agentmail.md](https://agentmail.md).
+
 ## Start
 
 ```bash
@@ -22,7 +24,7 @@ agentmail inboxes list --format json
 
 No API key yet? Start with [signup.md](signup.md).
 
-## Guides
+## Files
 
 - [signup.md](signup.md): create an AgentMail agent account and verify by OTP.
 - [core.md](core.md): create inboxes, send, read, reply, forward, label, and
