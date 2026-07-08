@@ -1,17 +1,18 @@
-// Build a local copy of the site — the same pages, adapted for offline use as a
-// plain folder of .md files:
-//   - https://agentmail.md/... links  ->  relative file paths (core.md, llms.txt)
-//   - the signup `referrer` value (agentmail.md on the web) is set from --referrer
-// agentmail.to links (the API and docs) are left untouched.
+// Build a local copy of the AgentMail skill package adapted for offline use as
+// a plain folder of .md files:
+//   - https://agentmail.md/<file> links  ->  relative file paths (core.md, llms.txt)
+//   - the signup `--referrer agentmail.md` value is set from --referrer
+// External AgentMail links are left untouched.
 //
 // Run: `npm run build:local -- [--out=local] [--referrer=<value>]`
 //   or: `node scripts/build-local.js [--out=local] [--referrer=<value>]`  (needs public/)
 
-import { readFileSync, writeFileSync, readdirSync, mkdirSync, rmSync, existsSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync, rmSync, existsSync } from "node:fs";
 import { join } from "node:path";
 
 const ROOT = process.cwd();
 const SRC = join(ROOT, "public"); // the web build
+const MANIFEST_FILE = join(ROOT, "agentmail", "manifest.json");
 
 const args = process.argv.slice(2);
 const flag = (name, def) => {
@@ -26,37 +27,33 @@ if (!existsSync(SRC)) {
   process.exit(1);
 }
 
-// Left out of the local skill package: web-only artifacts, plus index.md — its
-// body is SKILL.md's body, so SKILL.md (with frontmatter) supersedes it offline.
-const SKIP = new Set(["sitemap.xml", "robots.txt", "index.md"]);
+const MANIFEST = JSON.parse(readFileSync(MANIFEST_FILE, "utf8"));
+const LOCAL_FILES = [...MANIFEST.pages.map((page) => page.file), "llms-full.txt", "llms.txt"];
 
-// Rewrite absolute agentmail.md links to relative local file paths.
+// Rewrite generated absolute file links to relative local file paths.
 function toLocalLinks(content) {
   return content.replace(/https:\/\/agentmail\.md(\/[A-Za-z0-9._\/-]*)?/g, (_, rest) => {
-    if (rest == null) return "."; // bare domain
+    if (rest == null || rest === "" || rest === "/") return "https://agentmail.md";
     const path = rest.slice(1); // strip leading slash
-    if (path === "") return "SKILL.md"; // site root -> the skill entry point
     if (/\.(md|txt|xml)$/.test(path)) return path; // already a filename
     return `${path}.md`; // extensionless slug -> file
   });
 }
 
-// After the URLs are gone, the only remaining bare `agentmail.md` is the referrer
-// value — set it to the caller's --referrer.
+// Set only the signup referrer value; do not rewrite the hosted reference URL.
 function setReferrer(content) {
-  return content.replaceAll("agentmail.md", REFERRER);
+  return content.replaceAll("--referrer agentmail.md", `--referrer ${REFERRER}`);
 }
 
 rmSync(OUT, { recursive: true, force: true });
 mkdirSync(OUT, { recursive: true });
 
-const files = readdirSync(SRC).filter((f) => !SKIP.has(f));
-for (const f of files) {
+for (const f of LOCAL_FILES) {
   let content = readFileSync(join(SRC, f), "utf8");
   content = toLocalLinks(content);
   content = setReferrer(content);
   writeFileSync(join(OUT, f), content);
 }
 
-console.log(`Exported ${files.length} files to ${OUT} (referrer: ${REFERRER}):`);
-for (const f of files) console.log(`  ${f}`);
+console.log(`Exported ${LOCAL_FILES.length} files to ${OUT} (referrer: ${REFERRER}):`);
+for (const f of LOCAL_FILES) console.log(`  ${f}`);

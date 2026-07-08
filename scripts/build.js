@@ -1,141 +1,175 @@
-// Build step: assemble the site into ./public.
-//
-// Pages with frontmatter (name + description) are indexed — they drive the
-// machine-readable outputs (llms.txt, llms-full.txt, sitemap.xml). Pages without
-// frontmatter (index.md, and any future about.md, ...) are copied through
-// verbatim but not indexed. Zero dependencies.
+// Build step: publish the canonical AgentMail skill package from ./agentmail
+// into ./public, plus machine-readable discovery files.
 //
 // Run: `npm run build`  (or `node scripts/build.js`)
 
-import { readFileSync, writeFileSync, readdirSync, mkdirSync, rmSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync, rmSync, existsSync, readdirSync } from "node:fs";
 import { join, basename } from "node:path";
 
 const ROOT = process.cwd();
+const SRC = join(ROOT, "agentmail");
+const SITE = join(ROOT, "site");
 const OUT = join(ROOT, "public");
+const MANIFEST_FILE = join(SRC, "manifest.json");
+const SITE_INDEX_FILE = join(SITE, "index.md");
 
-const SITE = {
-  baseUrl: "https://agentmail.md",
-  title: "AgentMail Skills",
-  tagline:
-    "Markdown skills that teach an AI agent how to use [AgentMail](https://agentmail.to) — " +
-    "the email inbox API for agents. Each skill is a raw markdown file you can fetch and " +
-    "drop straight into an agent's context.",
-  // Frontmatter for the generated SKILL.md — the Agent Skills entry point. Its body
-  // is index.md, so the site doubles as an installable single-skill package.
-  skill: {
-    name: "agentmail",
-    description:
-      "Give an AI agent its own email — create AgentMail inboxes and send, receive, reply " +
-      "to, and thread real email over a REST API, with webhook or websocket delivery. Use " +
-      "when an agent needs an email address, must email a human, or has to receive, search, " +
-      "or act on incoming mail. Start here, then read the linked pages as needed.",
-  },
-};
-
-// README.md is repo documentation, not part of the served site.
-const NOT_SERVED = new Set(["README.md"]);
-
-// Presentation metadata — display title + order — is centralized here instead of
-// being repeated in each page's frontmatter. A page's order is its position in
-// this array; its title is the `title` field. Pages omitted from the list are
-// appended last with their slug as the title.
-const MANIFEST = JSON.parse(readFileSync(join(ROOT, "pages.json"), "utf8"));
-const META = new Map(
-  MANIFEST.map((entry, i) => [entry.slug, { title: entry.title, order: i, related: entry.related ?? [] }])
-);
+function readJson(file) {
+  return JSON.parse(readFileSync(file, "utf8"));
+}
 
 function parseFrontmatter(raw) {
-  const m = raw.match(/^---\n([\s\S]*?)\n---\n?/);
-  if (!m) return { data: {}, body: raw, hasFrontmatter: false };
+  const match = raw.match(/^---\n([\s\S]*?)\n---\n?/);
+  if (!match) return { data: {}, body: raw, hasFrontmatter: false };
+
   const data = {};
-  for (const line of m[1].split("\n")) {
+  for (const line of match[1].split("\n")) {
     const i = line.indexOf(":");
     if (i === -1) continue;
     data[line.slice(0, i).trim()] = line.slice(i + 1).trim();
   }
-  return { data, body: raw.slice(m[0].length), hasFrontmatter: true };
+
+  return { data, body: raw.slice(match[0].length), hasFrontmatter: true };
 }
 
-// An indexed page is any served root .md that carries a frontmatter block. Pages
-// without frontmatter (index.md and any future about.md, ...) are skipped here —
-// but still copied to the output by the build step below.
-function loadPages() {
-  const pages = readdirSync(ROOT)
-    .filter((f) => f.endsWith(".md") && !NOT_SERVED.has(f))
-    .map((file) => ({ file, ...parseFrontmatter(readFileSync(join(ROOT, file), "utf8")) }))
-    .filter((f) => f.hasFrontmatter)
-    .map(({ file, data, body }) => {
-      const slug = basename(file, ".md");
-      if (!data.description) throw new Error(`${file}: missing 'description' in frontmatter`);
-      const meta = META.get(slug);
-      if (!meta) console.warn(`Warning: ${file} is not listed in pages.json — appended last, title = slug`);
-      return {
-        slug,
-        file,
-        body,
-        title: meta?.title ?? slug,
-        description: data.description,
-        order: meta ? meta.order : Number.MAX_SAFE_INTEGER,
-        related: meta?.related ?? [],
-      };
+function readPages(manifest) {
+  const seen = new Set();
+  const pages = manifest.pages.map((entry, index) => {
+    if (!entry.file || !entry.file.endsWith(".md")) throw new Error("Every page entry needs a .md file");
+    if (!entry.title) throw new Error(`${entry.file}: missing title in manifest`);
+    if (!entry.description) throw new Error(`${entry.file}: missing description in manifest`);
+    if (seen.has(entry.file)) throw new Error(`${entry.file}: duplicate manifest entry`);
+    seen.add(entry.file);
+
+    const source = join(SRC, entry.file);
+    if (!existsSync(source)) throw new Error(`${entry.file}: listed in manifest but missing from agentmail/`);
+
+    const raw = readFileSync(source, "utf8");
+    if (!raw.trim()) throw new Error(`${entry.file}: empty markdown file`);
+
+    return {
+      ...entry,
+      index,
+      raw: raw.trimEnd() + "\n",
+      slug: basename(entry.file, ".md"),
+      url: `${manifest.baseUrl}/${entry.file}`,
+    };
+  });
+
+  const skill = pages.find((page) => page.file === "SKILL.md");
+  if (!skill) throw new Error("manifest must include SKILL.md");
+
+  for (const file of readdirSync(SRC).filter((f) => f.endsWith(".md"))) {
+    if (!seen.has(file)) throw new Error(`${file}: markdown file exists but is missing from manifest`);
+  }
+
+  const skillFrontmatter = parseFrontmatter(skill.raw);
+  if (!skillFrontmatter.hasFrontmatter) throw new Error("SKILL.md needs skill frontmatter");
+  if (skillFrontmatter.data.name !== "agentmail") throw new Error("SKILL.md frontmatter name must be agentmail");
+  if (skillFrontmatter.data.description !== skill.description) {
+    throw new Error("SKILL.md frontmatter description must match manifest description");
+  }
+
+  return pages;
+}
+
+function readSitePages() {
+  if (!existsSync(SITE_INDEX_FILE)) throw new Error("site/index.md is missing");
+
+  const seen = new Set();
+  return readdirSync(SITE)
+    .filter((file) => file.endsWith(".md"))
+    .sort((a, b) => (a === "index.md" ? -1 : b === "index.md" ? 1 : a.localeCompare(b)))
+    .map((file) => {
+      if (seen.has(file)) throw new Error(`site/${file}: duplicate site file`);
+      seen.add(file);
+
+      const raw = readFileSync(join(SITE, file), "utf8");
+      if (!raw.trim()) throw new Error(`site/${file}: empty markdown file`);
+      return { file, raw: raw.trimEnd() + "\n", url: `${manifest.baseUrl}/${file}` };
     });
+}
 
-  const found = new Set(pages.map((p) => p.slug));
+function normalizeHostedPath(path) {
+  if (path === "" || path === "/") return "index.md";
 
-  // Catch a stale manifest: an entry with no corresponding page file.
-  for (const { slug } of MANIFEST) {
-    if (!found.has(slug)) throw new Error(`pages.json lists "${slug}" but ${slug}.md does not exist`);
+  const stripped = path.startsWith("/") ? path.slice(1) : path;
+  if (stripped === "") return "index.md";
+  if (stripped.endsWith("/")) return `${stripped.slice(0, -1)}.md`;
+  if (/\.[A-Za-z0-9]+$/.test(stripped)) return stripped;
+  return `${stripped}.md`;
+}
+
+function validateSkillLinks(file, raw, allowedRelativeTargets) {
+  for (const match of raw.matchAll(/\[[^\]]+\]\(([^)]+)\)/g)) {
+    const target = match[1].split("#")[0];
+    if (!target || /^(https?:|mailto:)/.test(target)) continue;
+    if (target.startsWith("/")) throw new Error(`${file}: use sibling links, not root paths: ${match[1]}`);
+    if (target.includes("/")) throw new Error(`${file}: avoid path prefixes in local links: ${match[1]}`);
+    if (!allowedRelativeTargets.has(target)) throw new Error(`${file}: missing relative link target ${match[1]}`);
   }
+}
 
-  // Catch `related` references that don't point at an indexed page.
-  for (const p of pages) {
-    for (const rel of p.related) {
-      if (!found.has(rel)) throw new Error(`pages.json: "${p.slug}" relates to "${rel}", not an indexed page`);
+function validateWebsiteLinks(file, raw, manifest, allowedHostedTargets) {
+  for (const match of raw.matchAll(/\[[^\]]+\]\(([^)]+)\)/g)) {
+    const target = match[1].split("#")[0];
+    if (!target || /^mailto:/.test(target)) continue;
+
+    if (target.startsWith(manifest.baseUrl)) {
+      const path = target.slice(manifest.baseUrl.length);
+      const normalized = normalizeHostedPath(path);
+      if (!allowedHostedTargets.has(normalized)) {
+        throw new Error(`${file}: hosted URL does not resolve to generated file: ${match[1]}`);
+      }
+      continue;
     }
+
+    if (/^https?:/.test(target)) continue;
+
+    throw new Error(`${file}: website links must be absolute URLs: ${match[1]}`);
   }
-
-  return pages.sort((a, b) => a.order - b.order || a.slug.localeCompare(b.slug));
 }
 
-const url = (slug) => `${SITE.baseUrl}/${slug}`;
+function toHostedLinks(raw, manifest, allowedRelativeTargets) {
+  return raw.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (full, label, target) => {
+    const [path, hash = ""] = target.split("#");
+    if (!path || /^(https?:|mailto:)/.test(path)) return full;
+    if (path.startsWith("/") || path.includes("/") || !allowedRelativeTargets.has(path)) return full;
 
-// A "Related" section appended to each indexed page's served copy. Each entry is
-// an absolute link to a `related` page plus that page's own frontmatter
-// description, so navigation survives the page being fetched alone.
-function relatedSection(page, bySlug) {
-  if (!page.related.length) return "";
-  const bullets = page.related
-    .map((slug) => {
-      const r = bySlug.get(slug);
-      return `- [${r.title}](${url(slug)}) — ${r.description}`;
-    })
-    .join("\n");
-  return `\n\n## Related\n\n${bullets}\n`;
+    const suffix = hash ? `#${hash}` : "";
+    return `[${label}](${manifest.baseUrl}/${path}${suffix})`;
+  });
 }
 
-// Spec: https://llmstxt.org — H1 + blockquote summary, then an H2 link-list section.
-function buildLlms(pages) {
-  const bullets = pages
-    .map((p) => `- [${p.title}](${url(p.slug)}): ${p.description}`)
+function buildLlms(manifest, pages) {
+  const skill = pages.find((page) => page.file === "SKILL.md");
+  const references = pages
+    .filter((page) => page.file !== "SKILL.md")
+    .map((page) => `- [${page.title}](${page.url}): ${page.description}`)
     .join("\n");
-  return `# ${SITE.title}
 
-> ${SITE.tagline}
+  return `# ${manifest.title}
 
-## Pages
+> ${manifest.tagline}
 
-${bullets}
+## Skill
+
+- [${skill.title}](${skill.url}): ${skill.description}
+
+## Reference Files
+
+${references}
 `;
 }
 
-function buildLlmsFull(pages) {
+function buildLlmsFull(manifest, pages) {
   const sections = pages
-    .map((p) => `<!-- ${url(p.slug)} -->\n\n${p.body.trim()}`)
+    .map((page) => `<!-- ${page.url} -->\n\n${page.raw.trim()}`)
     .join("\n\n---\n\n");
-  return `# ${SITE.title} — full text
 
-> ${SITE.tagline}
-> Source: ${SITE.baseUrl}
+  return `# ${manifest.title} - full text
+
+> ${manifest.tagline}
+> Source: ${manifest.baseUrl}
 
 ---
 
@@ -143,8 +177,11 @@ ${sections}
 `;
 }
 
-function buildSitemap(pages) {
-  const locs = [`${SITE.baseUrl}/`, `${SITE.baseUrl}/SKILL.md`, ...pages.map((p) => url(p.slug))];
+function buildSitemap(manifest, pages, sitePages) {
+  const siteUrls = sitePages
+    .filter((page) => page.file !== "index.md")
+    .map((page) => page.url);
+  const locs = [`${manifest.baseUrl}/`, ...pages.map((page) => page.url), ...siteUrls];
   const urls = locs.map((loc) => `  <url>\n    <loc>${loc}</loc>\n  </url>`).join("\n");
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -153,49 +190,53 @@ ${urls}
 `;
 }
 
-function buildRobots() {
+function buildRobots(manifest) {
   return `User-agent: *
 Allow: /
 
-Sitemap: ${SITE.baseUrl}/sitemap.xml
+Sitemap: ${manifest.baseUrl}/sitemap.xml
 `;
 }
 
-// SKILL.md — the Agent Skills entry point: the landing page (index.md) with skill
-// frontmatter prepended. Loaders read this first, then follow its links to the pages.
-function buildSkill(indexBody) {
-  return `---
-name: ${SITE.skill.name}
-description: ${SITE.skill.description}
----
+const manifest = readJson(MANIFEST_FILE);
+if (!manifest.title) throw new Error("manifest missing title");
+if (!manifest.tagline) throw new Error("manifest missing tagline");
+if (!manifest.baseUrl) throw new Error("manifest missing baseUrl");
 
-${indexBody.trim()}
-`;
+const pages = readPages(manifest);
+const sitePages = readSitePages();
+const pageFiles = new Set(pages.map((page) => page.file));
+const siteFiles = new Set(sitePages.map((page) => page.file));
+for (const file of siteFiles) {
+  if (pageFiles.has(file)) throw new Error(`site/${file} conflicts with agentmail/${file}`);
 }
+const skillAllowedTargets = new Set(pageFiles);
+const siteAllowedTargets = new Set([...pageFiles, ...siteFiles, "llms.txt", "llms-full.txt"]);
 
-// --- build ---
-const pages = loadPages();
-if (pages.length === 0) throw new Error("No indexed .md pages found at repo root");
+for (const page of pages) validateSkillLinks(`agentmail/${page.file}`, page.raw, skillAllowedTargets);
+for (const page of sitePages) validateWebsiteLinks(`site/${page.file}`, page.raw, manifest, siteAllowedTargets);
 
 rmSync(OUT, { recursive: true, force: true });
 mkdirSync(OUT, { recursive: true });
 
-// Copy all served markdown to the output root (so /<name> -> /<name>.md). Indexed
-// pages get a Related section appended; unindexed pages are copied verbatim.
-const byFile = new Map(pages.map((p) => [p.file, p]));
-const bySlug = new Map(pages.map((p) => [p.slug, p]));
-const served = readdirSync(ROOT).filter((f) => f.endsWith(".md") && !NOT_SERVED.has(f));
-for (const f of served) {
-  const raw = readFileSync(join(ROOT, f), "utf8");
-  const section = byFile.has(f) ? relatedSection(byFile.get(f), bySlug) : "";
-  writeFileSync(join(OUT, f), section ? raw.trimEnd() + section : raw);
+for (const page of sitePages) {
+  writeFileSync(join(OUT, page.file), page.raw);
 }
 
-writeFileSync(join(OUT, "SKILL.md"), buildSkill(readFileSync(join(ROOT, "index.md"), "utf8")));
-writeFileSync(join(OUT, "llms.txt"), buildLlms(pages));
-writeFileSync(join(OUT, "llms-full.txt"), buildLlmsFull(pages));
-writeFileSync(join(OUT, "sitemap.xml"), buildSitemap(pages));
-writeFileSync(join(OUT, "robots.txt"), buildRobots());
+const hostedPages = pages.map((page) => ({
+  ...page,
+  raw: toHostedLinks(page.raw, manifest, skillAllowedTargets),
+}));
 
-console.log(`Copied ${served.length} pages; generated SKILL.md, llms.txt, llms-full.txt, sitemap.xml, robots.txt into public/`);
-for (const p of pages) console.log(`  ${p.slug} — ${p.title}`);
+for (const page of hostedPages) {
+  writeFileSync(join(OUT, page.file), page.raw);
+}
+
+writeFileSync(join(OUT, "llms.txt"), buildLlms(manifest, pages));
+writeFileSync(join(OUT, "llms-full.txt"), buildLlmsFull(manifest, hostedPages));
+writeFileSync(join(OUT, "sitemap.xml"), buildSitemap(manifest, pages, sitePages));
+writeFileSync(join(OUT, "robots.txt"), buildRobots(manifest));
+
+console.log(`Copied ${pages.length} skill files from agentmail/ into public/`);
+for (const page of sitePages) console.log(`  ${page.file} - Website page`);
+for (const page of pages) console.log(`  ${page.file} - ${page.title}`);

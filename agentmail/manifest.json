@@ -1,0 +1,37 @@
+{
+  "title": "AgentMail Agent Reference",
+  "tagline": "Level-one AgentMail reference for coding agents.",
+  "baseUrl": "https://agentmail.md",
+  "pages": [
+    {
+      "file": "SKILL.md",
+      "title": "AgentMail Skill",
+      "description": "Use AgentMail CLI to give agents real email inboxes."
+    },
+    {
+      "file": "signup.md",
+      "title": "Self-Signup",
+      "description": "Create an AgentMail agent account with the CLI and verify it by OTP."
+    },
+    {
+      "file": "core.md",
+      "title": "Core",
+      "description": "Use the AgentMail CLI for inboxes, messages, threads, labels, and attachments."
+    },
+    {
+      "file": "webhooks.md",
+      "title": "Webhooks",
+      "description": "Receive AgentMail events on a public HTTPS server."
+    },
+    {
+      "file": "websockets.md",
+      "title": "WebSockets",
+      "description": "Stream AgentMail events to a local agent process."
+    },
+    {
+      "file": "mcp.md",
+      "title": "MCP",
+      "description": "Use AgentMail through MCP when the harness expects MCP tools."
+    }
+  ]
+}

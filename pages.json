@@ -1,6 +1,0 @@
-[
-  { "slug": "signup", "title": "Sign up", "related": ["core", "websockets", "webhooks"] },
-  { "slug": "core", "title": "Core API", "related": ["signup", "webhooks", "websockets"] },
-  { "slug": "webhooks", "title": "Webhooks", "related": ["core", "websockets", "signup"] },
-  { "slug": "websockets", "title": "WebSockets", "related": ["core", "webhooks", "signup"] }
-]

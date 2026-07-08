@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "node scripts/build.js",
-    "build:local": "npm run build && node scripts/build-local.js"
+    "build:local": "npm run build && node scripts/build-local.js",
+    "build:hermes": "node scripts/build-hermes.js"
   }
 }
