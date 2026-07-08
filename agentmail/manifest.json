@@ -1,0 +1,32 @@
+{
+  "title": "AgentMail Agent Reference",
+  "tagline": "CLI-first AgentMail skill markdown for coding agents.",
+  "baseUrl": "https://agentmail.md",
+  "pages": [
+    {
+      "file": "SKILL.md",
+      "title": "AgentMail Skill",
+      "description": "Use AgentMail CLI to give agents real email."
+    },
+    {
+      "file": "signup.md",
+      "title": "Self-Signup",
+      "description": "Create an AgentMail agent account with the CLI and verify it by OTP."
+    },
+    {
+      "file": "cli.md",
+      "title": "CLI Workflows",
+      "description": "Use the AgentMail CLI for inboxes, messages, threads, labels, and attachments."
+    },
+    {
+      "file": "realtime.md",
+      "title": "Realtime Delivery",
+      "description": "Choose webhooks or WebSockets for incoming AgentMail events."
+    },
+    {
+      "file": "fallbacks.md",
+      "title": "Fallbacks and Limits",
+      "description": "Use REST or MCP only when the CLI is not the right integration path."
+    }
+  ]
+}

@@ -1,6 +1,6 @@
-// Build a local copy of the site — the same pages, adapted for offline use as a
-// plain folder of .md files:
-//   - https://agentmail.md/... links  ->  relative file paths (core.md, llms.txt)
+// Build a local copy of the AgentMail skill package adapted for offline use as
+// a plain folder of .md files:
+//   - https://agentmail.md/... links  ->  relative file paths (cli.md, llms.txt)
 //   - the signup `referrer` value (agentmail.md on the web) is set from --referrer
 // agentmail.to links (the API and docs) are left untouched.
 //
@@ -26,8 +26,8 @@ if (!existsSync(SRC)) {
   process.exit(1);
 }
 
-// Left out of the local skill package: web-only artifacts, plus index.md — its
-// body is SKILL.md's body, so SKILL.md (with frontmatter) supersedes it offline.
+// Left out of the local skill package: web-only artifacts, plus index.md — it is
+// the website landing page, while SKILL.md is the local package entry point.
 const SKIP = new Set(["sitemap.xml", "robots.txt", "index.md"]);
 
 // Rewrite absolute agentmail.md links to relative local file paths.
