@@ -34,7 +34,3 @@ Otherwise start with **[core](https://agentmail.md/core)**.
 
 - [llms.txt](https://agentmail.md/llms.txt)
 - [llms-full.txt](https://agentmail.md/llms-full.txt)
-
-The authored skill package lives in `agentmail/` in the repository, but hosted
-website links are absolute `https://agentmail.md/...` URLs with no package path
-prefix.
