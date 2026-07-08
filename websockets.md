@@ -18,7 +18,8 @@ public URL required**. Ideal when you can't (or don't want to) run a webhook rec
 - **Polling** (`GET .../messages` in [core](https://agentmail.md/core)) — simplest, no
   persistent connection, higher latency.
 
-Assumes you have an API key and the basics from [core](https://agentmail.md/core).
+Assumes you already have an API key and the send/receive basics from
+[core](https://agentmail.md/core).
 
 ## Connecting & protocol
 
@@ -29,11 +30,9 @@ parameter (EU region: `wss://ws.agentmail.eu/v0`):
 wss://ws.agentmail.to/v0?api_key=$AGENTMAIL_API_KEY
 ```
 
-> The URL, `api_key` param, and frame shapes below are from AgentMail's published
-> AsyncAPI spec / API reference. The **SDK `connect()` path (further down) is the
-> vendor-maintained way to open this connection** and handles the URL for you — prefer
-> it unless you specifically need a raw client. (An older skill referenced
-> `wss://api.agentmail.to/v0/ws?token=...`; the current protocol is the one here.)
+> The **SDK's `connect()` (further down) is the vendor-maintained way to open this
+> connection** — it handles the URL and framing for you. Prefer it unless you need a
+> raw client.
 
 After connecting, **send a subscribe frame** to choose what you receive. Empty arrays
 mean "everything you're allowed to see":

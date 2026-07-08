@@ -3,9 +3,8 @@
 [AgentMail](https://agentmail.to) is an email inbox API built for AI agents —
 create an inbox, then send, receive, and thread real email over a REST API.
 
-This site publishes **skills**: focused, self-contained guides that teach an agent
-how to use AgentMail. Each one is served as raw markdown, so an agent can fetch it
-and drop it straight into its context — no extension needed.
+These are focused, self-contained guides for using that API, one capability each.
+Read the one you need — each links to the related guides it builds on.
 
 ## Skills
 

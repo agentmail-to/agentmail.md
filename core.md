@@ -3,7 +3,7 @@ name: core
 description: Create AgentMail inboxes and send/receive/reply to email via the REST API (auth, endpoints, pagination, idempotency, rate limits).
 ---
 
-# AgentMail core API
+# AgentMail Core API
 
 AgentMail is an email inbox API for agents. This skill is the foundation: authenticate,
 create inboxes, send mail, receive by polling, load threads, reply, forward, label, and
@@ -260,15 +260,17 @@ off for that long, then retry; use exponential backoff on repeats.
 | `404` | Inbox/message/thread not found. |
 | `429` | Rate-limited — honor `Retry-After`. |
 
-**Plan quotas:**
+**Plan quotas** (per plan; `GET /v0/organizations` returns your live `inbox_limit`,
+`domain_limit`, and current counts):
 
-| Plan | Emails | Inboxes |
-| --- | --- | --- |
-| Free | 3,000 | 3 |
-| Developer | 10,000 | 10 |
-| Startup | 150,000 | 150 |
+| Plan | Inboxes | Sends/day | Sends/month |
+| --- | --- | --- | --- |
+| Free | 3 | 100 | — |
+| Developer ($20/mo) | 10 | 1,000 | 10,000 |
+| Startup ($200/mo) | 150 | 15,000 | 150,000 |
 
-Check current usage/limits with `GET /v0/organizations`.
+An unclaimed agent is on the **Agent** tier — 1 inbox, 10 sends/day (see
+[signup](https://agentmail.md/signup)).
 
 ## SDKs
 

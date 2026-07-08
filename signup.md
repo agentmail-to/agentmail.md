@@ -16,9 +16,9 @@ API. This skill only covers getting the key and getting claimed.
 
 1. **Sign up** — one call returns an `inbox_id` (your email address) and an `api_key`.
 2. **Email your human** — you can only send to their address until you're claimed.
-3. **Get claimed** — the human replies with an OTP code (you `verify` it) or signs up
-   on the console. Either way, your inbox becomes fully capable.
-4. **Check status** — confirm you're verified and see your limits.
+3. **Wait for the reply** — poll, or open a WebSocket, for their response.
+4. **Verify** — submit the OTP they reply with (or they claim you via the console).
+5. **Check status** — confirm you're claimed and see your limits.
 
 ## 1. Sign up
 
@@ -123,18 +123,21 @@ curl https://api.agentmail.to/v0/organizations \
   -H "Authorization: Bearer $AGENTMAIL_API_KEY"
 ```
 
-Returns your `plan_id`, inbox/domain limits and counts, `daily_send_limit`,
-`monthly_send_limit`, and `auth_type`:
+Returns your inbox/domain limits and counts (`inbox_limit`, `domain_limit`,
+`inbox_count`, `domain_count`) and — for an agent org — **`agent_verified`**, the
+reliable claim signal:
 
-| `auth_type` | Meaning |
+| `agent_verified` | Meaning |
 | --- | --- |
-| `agent_unverified` | Signed up but not claimed — **restricted mode** (see below). |
-| `agent_verified` | Claimed via OTP — full API. |
-| `clerk` | The human owns a console account — full API. |
+| `false` | Signed up but not claimed — **restricted mode** (see below). |
+| `true` | Claimed (via OTP, or the human's console signup) — full API. |
+
+`agent_verified` is present from sign-up on (explicitly `false`), so you can poll it
+both before and after claiming.
 
 ## Restricted mode (until claimed)
 
-While `auth_type` is `agent_unverified` you can **only**:
+While `agent_verified` is `false` you can **only**:
 
 - Send email **to the human's address** — no other recipients.
 - Send at most **10 emails/day**.
@@ -160,6 +163,6 @@ is optional.
   Check it periodically:
 
   ```bash
-  curl "https://api.agentmail.to/v0/metrics?event_types=message.bounced&event_types=message.sent" \
+  curl "https://api.agentmail.to/v0/metrics/events?event_types=message.bounced&event_types=message.sent" \
     -H "Authorization: Bearer $AGENTMAIL_API_KEY"
   ```

@@ -3,7 +3,7 @@ name: webhooks
 description: Receive AgentMail email events by webhook — register endpoints, handle payloads, verify Svix signatures, build an event-driven agent.
 ---
 
-# AgentMail webhooks
+# AgentMail Webhooks
 
 Webhooks push email events to your HTTPS endpoint the moment they happen — no polling.
 Use them for a persistent, publicly reachable server.
@@ -18,7 +18,7 @@ Use them for a persistent, publicly reachable server.
 - **Polling** (`GET .../messages` in [core](https://agentmail.md/core)) — simplest, no
   infra, higher latency.
 
-This skill assumes you already have an API key and know the send/receive basics from
+Assumes you already have an API key and the send/receive basics from
 [core](https://agentmail.md/core).
 
 ## Event types
