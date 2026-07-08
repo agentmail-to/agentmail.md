@@ -12,8 +12,6 @@ an agent-owned address.
 Use the `agentmail` CLI first. Use MCP only when the harness expects MCP tools,
 and use REST only when the CLI is missing a required operation.
 
-Hosted reference: [agentmail.md](https://agentmail.md).
-
 ## Start
 
 ```bash
@@ -43,6 +41,15 @@ No API key yet? Start with [signup.md](signup.md).
 - Subscribe or react to `message.received` for inbound loops; do not process
   your own outbound lifecycle events as new work.
 - Never send `AGENTMAIL_API_KEY` anywhere except AgentMail API or MCP endpoints.
+
+## References
+
+- [agentmail.md](https://agentmail.md): this level-one reference.
+- [Console](https://console.agentmail.to): create human-managed API keys and
+  manage the account.
+- [Docs](https://docs.agentmail.to): full product documentation.
+- [API reference](https://docs.agentmail.to/api-reference): REST and schema
+  details.
 
 ## Verify
 

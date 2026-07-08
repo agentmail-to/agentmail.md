@@ -22,5 +22,9 @@ Otherwise start with **[core](https://agentmail.md/core)**.
 
 - [SKILL.md](https://agentmail.md/SKILL.md): skill entry point.
 - [mcp.md](https://agentmail.md/mcp.md): MCP integration.
+- [Console](https://console.agentmail.to): account and API key management.
+- [Docs](https://docs.agentmail.to): full product documentation.
+- [API reference](https://docs.agentmail.to/api-reference): REST and schema
+  details.
 - [llms.txt](https://agentmail.md/llms.txt)
 - [llms-full.txt](https://agentmail.md/llms-full.txt)
