@@ -5,11 +5,7 @@ create an inbox, then send, receive, and thread real email over a REST API.
 
 This site publishes **skills**: focused, self-contained guides that teach an agent
 how to use AgentMail. Each one is served as raw markdown, so an agent can fetch it
-and drop it straight into its context — no extension needed:
-
-```bash
-curl https://agentmail.md/core
-```
+and drop it straight into its context — no extension needed.
 
 ## Skills
 

@@ -72,9 +72,10 @@ slug that isn't an indexed page — is an error.
 | Output | Source | Purpose |
 | --- | --- | --- |
 | `index.md`, `<name>.md` | copied (indexed pages get a `## Related` section) | the landing page + each indexed page |
+| `SKILL.md` | `index.md` body + `SITE.skill` frontmatter | [Agent Skill](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview) entry point (served at `/SKILL.md`) |
 | `llms.txt` | generated from indexed pages | [llms.txt](https://llmstxt.org) discovery index for LLM tooling |
 | `llms-full.txt` | generated from indexed pages | every page concatenated — one fetch for all of it |
-| `sitemap.xml` | root + indexed pages | for search-engine crawlers |
+| `sitemap.xml` | root, `SKILL.md` + indexed pages | for search-engine crawlers |
 | `robots.txt` | generated | allow-all + points to the sitemap |
 
 Local preview: `npm run build` then serve `public/` with any static server
@@ -102,6 +103,19 @@ natural content type (`.md` → markdown, `.xml` → xml, `.txt` → text).
    (that page is hand-maintained).
 4. Commit. Vercel runs `npm run build` on deploy — `llms.txt`, `llms-full.txt`,
    and `sitemap.xml` regenerate automatically.
+
+## Local build
+
+`npm run build:local` builds the site, then writes a `local/` folder that is a
+self-contained [Agent Skill](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview)
+package — a `SKILL.md` entry point plus the pages it references as bundled files:
+
+- `https://agentmail.md/...` links become relative file paths (`core.md`, `llms.txt`).
+- the signup `referrer` value is set from `--referrer` (default `agentmail.md`, unchanged).
+- `index.md` is dropped (its body is `SKILL.md`'s body); `sitemap.xml`/`robots.txt` too.
+
+Pass options after `--`: `npm run build:local -- --referrer=my-app --out=dist-local`.
+`agentmail.to` links (the API and docs) are otherwise left as real URLs.
 
 ## Deploy — Vercel
 

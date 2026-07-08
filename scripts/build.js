@@ -20,6 +20,16 @@ const SITE = {
     "Markdown skills that teach an AI agent how to use [AgentMail](https://agentmail.to) — " +
     "the email inbox API for agents. Each skill is a raw markdown file you can fetch and " +
     "drop straight into an agent's context.",
+  // Frontmatter for the generated SKILL.md — the Agent Skills entry point. Its body
+  // is index.md, so the site doubles as an installable single-skill package.
+  skill: {
+    name: "agentmail",
+    description:
+      "Give an AI agent its own email — create AgentMail inboxes and send, receive, reply " +
+      "to, and thread real email over a REST API, with webhook or websocket delivery. Use " +
+      "when an agent needs an email address, must email a human, or has to receive, search, " +
+      "or act on incoming mail. Start here, then read the linked pages as needed.",
+  },
 };
 
 // README.md is repo documentation, not part of the served site.
@@ -134,7 +144,7 @@ ${sections}
 }
 
 function buildSitemap(pages) {
-  const locs = [`${SITE.baseUrl}/`, ...pages.map((p) => url(p.slug))];
+  const locs = [`${SITE.baseUrl}/`, `${SITE.baseUrl}/SKILL.md`, ...pages.map((p) => url(p.slug))];
   const urls = locs.map((loc) => `  <url>\n    <loc>${loc}</loc>\n  </url>`).join("\n");
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -148,6 +158,18 @@ function buildRobots() {
 Allow: /
 
 Sitemap: ${SITE.baseUrl}/sitemap.xml
+`;
+}
+
+// SKILL.md — the Agent Skills entry point: the landing page (index.md) with skill
+// frontmatter prepended. Loaders read this first, then follow its links to the pages.
+function buildSkill(indexBody) {
+  return `---
+name: ${SITE.skill.name}
+description: ${SITE.skill.description}
+---
+
+${indexBody.trim()}
 `;
 }
 
@@ -169,10 +191,11 @@ for (const f of served) {
   writeFileSync(join(OUT, f), section ? raw.trimEnd() + section : raw);
 }
 
+writeFileSync(join(OUT, "SKILL.md"), buildSkill(readFileSync(join(ROOT, "index.md"), "utf8")));
 writeFileSync(join(OUT, "llms.txt"), buildLlms(pages));
 writeFileSync(join(OUT, "llms-full.txt"), buildLlmsFull(pages));
 writeFileSync(join(OUT, "sitemap.xml"), buildSitemap(pages));
 writeFileSync(join(OUT, "robots.txt"), buildRobots());
 
-console.log(`Copied ${served.length} pages; generated llms.txt, llms-full.txt, sitemap.xml, robots.txt into public/`);
+console.log(`Copied ${served.length} pages; generated SKILL.md, llms.txt, llms-full.txt, sitemap.xml, robots.txt into public/`);
 for (const p of pages) console.log(`  ${p.slug} — ${p.title}`);
