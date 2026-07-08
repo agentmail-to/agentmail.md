@@ -6,7 +6,7 @@
     {
       "file": "SKILL.md",
       "title": "AgentMail Skill",
-      "description": "Use AgentMail CLI to give agents real email."
+      "description": "Use when an agent needs AgentMail CLI email inboxes."
     },
     {
       "file": "signup.md",
