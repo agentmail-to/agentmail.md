@@ -34,16 +34,17 @@ wss://ws.agentmail.to/v0?api_key=$AGENTMAIL_API_KEY
 > connection** — it handles the URL and framing for you. Prefer it unless you need a
 > raw client.
 
-After connecting, **send a subscribe frame** to choose what you receive. Empty arrays
-mean "everything you're allowed to see":
+After connecting, **send a subscribe frame** to choose what you receive. Only `type`
+is required; **omit `inbox_ids`/`pod_ids` to receive everything you're allowed to see**
+(your inbox, pod, or whole org, depending on your key's scope):
 
 ```json
-{ "type": "subscribe", "event_types": [], "inbox_ids": [], "pod_ids": [] }
+{ "type": "subscribe" }
 ```
 
-Only `type` is required. Narrow the stream by listing `inbox_ids` and/or `event_types`
-(same names as in [webhooks](https://agentmail.md/webhooks#event-types), e.g.
-`message.received`).
+Narrow the stream by **listing** `inbox_ids` and/or `event_types` (same names as in
+[webhooks](https://agentmail.md/webhooks#event-types), e.g. `message.received`).
+**Don't pass empty arrays** — `"inbox_ids": []` subscribes to *nothing*, not everything.
 
 The server replies with a **`subscribed`** confirmation echoing your filters:
 
