@@ -19,6 +19,9 @@ agentmail/
   manifest.json  Hosted index metadata
 site/
   index.md       Website landing page served at /
+  core.md        Compatibility page for the previous /core topic
+  webhooks.md    Compatibility page for the previous /webhooks topic
+  websockets.md  Compatibility page for the previous /websockets topic
 scripts/
   build.js       Copies agentmail/ into public/ and generates indexes
   build-local.js Exports a local skill package
@@ -27,9 +30,9 @@ local/           Generated local package
 ```
 
 `agentmail/SKILL.md` is the source of truth for the skill entry point. Supporting
-files should stay terse, operational, and agent-oriented. `site/index.md` is the
-website landing page and should link to hosted files as siblings, such as
-`SKILL.md` and `cli.md`, without `agentmail/` path prefixes.
+files should stay terse, operational, and agent-oriented. `site/*.md` files are
+website pages and should link to hosted files as siblings, such as `SKILL.md` and
+`cli.md`, without `agentmail/` path prefixes.
 
 ## Build
 
@@ -42,7 +45,7 @@ This writes `public/`:
 | Output | Source | Purpose |
 | --- | --- | --- |
 | `SKILL.md`, `*.md` | copied from `agentmail/` | hosted skill package |
-| `index.md` | copied from `site/index.md` | website landing page |
+| `index.md`, website topic pages | copied from `site/` | website navigation and compatibility pages |
 | `llms.txt` | generated from `manifest.json` | discovery index |
 | `llms-full.txt` | generated from `manifest.json` and markdown files | one-file full reference |
 | `sitemap.xml`, `robots.txt` | generated | crawler support |
@@ -57,7 +60,7 @@ npm run build:local
 ```
 
 This runs the hosted build, then writes `local/` as a self-contained skill
-package. The website landing page is omitted; `SKILL.md` is the package entry
+package. Website pages from `site/` are omitted; `SKILL.md` is the package entry
 point. Links to `https://agentmail.md/...` become relative file links, and the
 self-signup `--referrer agentmail.md` value can be changed:
 
@@ -71,7 +74,7 @@ External AgentMail links such as `https://docs.agentmail.to` and
 ## Editing
 
 1. Edit skill files under `agentmail/`.
-2. Edit the website landing page in `site/index.md`.
+2. Edit website pages in `site/`.
 3. Update `agentmail/manifest.json` when adding, removing, renaming, or
    reordering files.
 4. Run `npm run build:local`.

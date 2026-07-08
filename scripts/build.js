@@ -72,6 +72,23 @@ function readPages(manifest) {
   return pages;
 }
 
+function readSitePages() {
+  if (!existsSync(SITE_INDEX_FILE)) throw new Error("site/index.md is missing");
+
+  const seen = new Set();
+  return readdirSync(SITE)
+    .filter((file) => file.endsWith(".md"))
+    .sort((a, b) => (a === "index.md" ? -1 : b === "index.md" ? 1 : a.localeCompare(b)))
+    .map((file) => {
+      if (seen.has(file)) throw new Error(`site/${file}: duplicate site file`);
+      seen.add(file);
+
+      const raw = readFileSync(join(SITE, file), "utf8");
+      if (!raw.trim()) throw new Error(`site/${file}: empty markdown file`);
+      return { file, raw: raw.trimEnd() + "\n", url: `${manifest.baseUrl}/${file}` };
+    });
+}
+
 function validateMarkdownLinks(file, raw, allowedRelativeTargets) {
   for (const match of raw.matchAll(/\[[^\]]+\]\(([^)]+)\)/g)) {
     const target = match[1].split("#")[0];
@@ -119,8 +136,11 @@ ${sections}
 `;
 }
 
-function buildSitemap(manifest, pages) {
-  const locs = [`${manifest.baseUrl}/`, ...pages.map((page) => page.url)];
+function buildSitemap(manifest, pages, sitePages) {
+  const siteUrls = sitePages
+    .filter((page) => page.file !== "index.md")
+    .map((page) => page.url);
+  const locs = [`${manifest.baseUrl}/`, ...pages.map((page) => page.url), ...siteUrls];
   const urls = locs.map((loc) => `  <url>\n    <loc>${loc}</loc>\n  </url>`).join("\n");
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -143,29 +163,34 @@ if (!manifest.tagline) throw new Error("manifest missing tagline");
 if (!manifest.baseUrl) throw new Error("manifest missing baseUrl");
 
 const pages = readPages(manifest);
+const sitePages = readSitePages();
 const pageFiles = new Set(pages.map((page) => page.file));
+const siteFiles = new Set(sitePages.map((page) => page.file));
+for (const file of siteFiles) {
+  if (pageFiles.has(file)) throw new Error(`site/${file} conflicts with agentmail/${file}`);
+}
 const skillAllowedTargets = new Set(pageFiles);
-const siteAllowedTargets = new Set([...pageFiles, "llms.txt", "llms-full.txt"]);
+const siteAllowedTargets = new Set([...pageFiles, ...siteFiles, "llms.txt", "llms-full.txt"]);
 
 for (const page of pages) validateMarkdownLinks(`agentmail/${page.file}`, page.raw, skillAllowedTargets);
-
-if (!existsSync(SITE_INDEX_FILE)) throw new Error("site/index.md is missing");
-const siteIndex = readFileSync(SITE_INDEX_FILE, "utf8").trimEnd() + "\n";
-validateMarkdownLinks("site/index.md", siteIndex, siteAllowedTargets);
+for (const page of sitePages) validateMarkdownLinks(`site/${page.file}`, page.raw, siteAllowedTargets);
 
 rmSync(OUT, { recursive: true, force: true });
 mkdirSync(OUT, { recursive: true });
+
+for (const page of sitePages) {
+  writeFileSync(join(OUT, page.file), page.raw);
+}
 
 for (const page of pages) {
   writeFileSync(join(OUT, page.file), page.raw);
 }
 
-writeFileSync(join(OUT, "index.md"), siteIndex);
 writeFileSync(join(OUT, "llms.txt"), buildLlms(manifest, pages));
 writeFileSync(join(OUT, "llms-full.txt"), buildLlmsFull(manifest, pages));
-writeFileSync(join(OUT, "sitemap.xml"), buildSitemap(manifest, pages));
+writeFileSync(join(OUT, "sitemap.xml"), buildSitemap(manifest, pages, sitePages));
 writeFileSync(join(OUT, "robots.txt"), buildRobots(manifest));
 
 console.log(`Copied ${pages.length} skill files from agentmail/ into public/`);
-console.log("  index.md - Website landing page");
+for (const page of sitePages) console.log(`  ${page.file} - Website page`);
 for (const page of pages) console.log(`  ${page.file} - ${page.title}`);

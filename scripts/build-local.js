@@ -7,11 +7,12 @@
 // Run: `npm run build:local -- [--out=local] [--referrer=<value>]`
 //   or: `node scripts/build-local.js [--out=local] [--referrer=<value>]`  (needs public/)
 
-import { readFileSync, writeFileSync, readdirSync, mkdirSync, rmSync, existsSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync, rmSync, existsSync } from "node:fs";
 import { join } from "node:path";
 
 const ROOT = process.cwd();
 const SRC = join(ROOT, "public"); // the web build
+const MANIFEST_FILE = join(ROOT, "agentmail", "manifest.json");
 
 const args = process.argv.slice(2);
 const flag = (name, def) => {
@@ -26,9 +27,8 @@ if (!existsSync(SRC)) {
   process.exit(1);
 }
 
-// Left out of the local skill package: web-only artifacts, plus index.md — it is
-// the website landing page, while SKILL.md is the local package entry point.
-const SKIP = new Set(["sitemap.xml", "robots.txt", "index.md"]);
+const MANIFEST = JSON.parse(readFileSync(MANIFEST_FILE, "utf8"));
+const LOCAL_FILES = [...MANIFEST.pages.map((page) => page.file), "llms-full.txt", "llms.txt"];
 
 // Rewrite absolute agentmail.md links to relative local file paths.
 function toLocalLinks(content) {
@@ -50,13 +50,12 @@ function setReferrer(content) {
 rmSync(OUT, { recursive: true, force: true });
 mkdirSync(OUT, { recursive: true });
 
-const files = readdirSync(SRC).filter((f) => !SKIP.has(f));
-for (const f of files) {
+for (const f of LOCAL_FILES) {
   let content = readFileSync(join(SRC, f), "utf8");
   content = toLocalLinks(content);
   content = setReferrer(content);
   writeFileSync(join(OUT, f), content);
 }
 
-console.log(`Exported ${files.length} files to ${OUT} (referrer: ${REFERRER}):`);
-for (const f of files) console.log(`  ${f}`);
+console.log(`Exported ${LOCAL_FILES.length} files to ${OUT} (referrer: ${REFERRER}):`);
+for (const f of LOCAL_FILES) console.log(`  ${f}`);
