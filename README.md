@@ -85,8 +85,8 @@ npm run build:hermes
 
 This writes `dist/hermes/skills/email/agentmail/`. It copies the neutral
 `agentmail/*.md` files, replaces only `SKILL.md` frontmatter with
-`targets/hermes/frontmatter.yaml`, keeps sibling markdown links, and changes the
-self-signup referrer to `hermes-agent`.
+`targets/hermes/frontmatter.yaml`, moves supporting files to `references/`, and
+changes the self-signup referrer to `hermes-agent`.
 
 Use that generated folder for the later Hermes PR. Do not put Hermes metadata in
 the neutral authored files or hosted website output.

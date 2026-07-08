@@ -45,11 +45,22 @@ function setReferrer(content) {
   return content.replaceAll("--referrer agentmail.md", `--referrer ${REFERRER}`);
 }
 
-function validateRelativeLinks(file, content, allowedFiles) {
+function toHermesSkillLinks(content, referenceFiles) {
+  return content.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (full, label, target) => {
+    const [path, hash = ""] = target.split("#");
+    if (!path || /^(https?:|mailto:)/.test(path)) return full;
+    if (path.startsWith("/") || path.includes("/") || !referenceFiles.has(path)) return full;
+
+    const suffix = hash ? `#${hash}` : "";
+    return `[${label}](references/${path}${suffix})`;
+  });
+}
+
+function validateRelativeLinks(file, content, allowedTargets) {
   for (const match of content.matchAll(/\[[^\]]+\]\(([^)]+)\)/g)) {
     const target = match[1].split("#")[0];
     if (!target || /^(https?:|mailto:)/.test(target)) continue;
-    if (target.startsWith("/") || target.includes("/") || !allowedFiles.has(target)) {
+    if (target.startsWith("/") || !allowedTargets.has(target)) {
       throw new Error(`${file}: bad relative link ${match[1]}`);
     }
   }
@@ -72,24 +83,31 @@ for (const required of ["version:", "author:", "license:", "metadata:", "hermes:
 }
 
 const files = manifest.pages.map((page) => page.file);
-const allowedFiles = new Set(files);
+const referenceFiles = new Set(files.filter((file) => file !== "SKILL.md"));
+const skillLinkTargets = new Set([...referenceFiles].map((file) => `references/${file}`));
 
 rmSync(OUT_ROOT, { recursive: true, force: true });
 mkdirSync(OUT, { recursive: true });
 
 for (const file of files) {
   const srcFile = join(SRC, file);
-  const outFile = join(OUT, file);
+  const outFile = file === "SKILL.md" ? join(OUT, file) : join(OUT, "references", file);
   if (!existsSync(srcFile)) throw new Error(`${file}: listed in manifest but missing`);
 
   let content = readFileSync(srcFile, "utf8").trimEnd() + "\n";
-  if (file === "SKILL.md") content = overlaySkillFrontmatter(content, frontmatter);
+  if (file === "SKILL.md") {
+    content = overlaySkillFrontmatter(content, frontmatter);
+    content = toHermesSkillLinks(content, referenceFiles);
+    validateRelativeLinks(file, content, skillLinkTargets);
+  } else {
+    validateRelativeLinks(file, content, referenceFiles);
+  }
   content = setReferrer(content);
-  validateRelativeLinks(file, content, allowedFiles);
 
   mkdirSync(dirname(outFile), { recursive: true });
   writeFileSync(outFile, content);
 }
 
 console.log(`Exported Hermes skill package to ${OUT} (referrer: ${REFERRER}):`);
-for (const file of files) console.log(`  ${file}`);
+console.log("  SKILL.md");
+for (const file of referenceFiles) console.log(`  references/${file}`);

@@ -2,7 +2,7 @@
 // a plain folder of .md files:
 //   - https://agentmail.md/<file> links  ->  relative file paths (core.md, llms.txt)
 //   - the signup `--referrer agentmail.md` value is set from --referrer
-// agentmail.to links (the API and docs) are left untouched.
+// External AgentMail links are left untouched.
 //
 // Run: `npm run build:local -- [--out=local] [--referrer=<value>]`
 //   or: `node scripts/build-local.js [--out=local] [--referrer=<value>]`  (needs public/)
