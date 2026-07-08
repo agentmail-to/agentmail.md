@@ -4,8 +4,8 @@ This repo publishes CLI-first AgentMail skill markdown for coding agents. The
 canonical authored package lives in `agentmail/`, and the generated hosted output
 lives in `public/`.
 
-The same `agentmail/` folder is intended to be ready to copy into another agent
-runtime, including the later Hermes `skills/email/agentmail/` PR.
+The authored package stays runtime-neutral. Target-specific exports, such as the
+later Hermes `skills/email/agentmail/` package, are generated from overlays.
 
 ## Layout
 
@@ -23,8 +23,13 @@ site/
 scripts/
   build.js       Copies agentmail/ into public/ and generates indexes
   build-local.js Exports a local skill package
+  build-hermes.js Exports a Hermes skill package
+targets/
+  hermes/
+    frontmatter.yaml Hermes-only SKILL.md frontmatter overlay
 public/          Generated hosted output
 local/           Generated local package
+dist/            Generated target-specific packages
 ```
 
 `agentmail/SKILL.md` is the source of truth for the skill entry point. Supporting
@@ -68,8 +73,23 @@ the self-signup `--referrer agentmail.md` value can be changed:
 npm run build:local -- --referrer=hermes-agent --out=local
 ```
 
-External AgentMail links such as `https://docs.agentmail.to` and
-`https://api.agentmail.to` are left as URLs.
+External AgentMail links such as `https://agentmail.to`,
+`https://console.agentmail.to`, and `https://docs.agentmail.to` are left as
+URLs.
+
+## Hermes Export
+
+```bash
+npm run build:hermes
+```
+
+This writes `dist/hermes/skills/email/agentmail/`. It copies the neutral
+`agentmail/*.md` files, replaces only `SKILL.md` frontmatter with
+`targets/hermes/frontmatter.yaml`, keeps sibling markdown links, and changes the
+self-signup referrer to `hermes-agent`.
+
+Use that generated folder for the later Hermes PR. Do not put Hermes metadata in
+the neutral authored files or hosted website output.
 
 ## Editing
 
@@ -77,8 +97,10 @@ External AgentMail links such as `https://docs.agentmail.to` and
 2. Edit website pages in `site/`.
 3. Update `agentmail/manifest.json` when adding, removing, renaming, or
    reordering files.
-4. Run `npm run build:local`.
-5. Review generated `public/` and `local/`.
+4. Update target overlays under `targets/` only when a target runtime needs
+   target-specific metadata.
+5. Run `npm run build:local` and `npm run build:hermes`.
+6. Review generated `public/`, `local/`, and `dist/hermes/`.
 
 Do not edit generated files by hand.
 

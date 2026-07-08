@@ -1,16 +1,6 @@
 ---
 name: agentmail
-description: Use when an agent needs AgentMail CLI email inboxes.
-version: 1.0.0
-author: AgentMail
-license: MIT
-platforms: [linux, macos, windows]
-metadata:
-  hermes:
-    tags: [Email, CLI, AgentMail, Communication]
-    homepage: https://agentmail.to
-prerequisites:
-  commands: [agentmail]
+description: Use AgentMail CLI to give agents real email inboxes.
 ---
 
 # AgentMail
