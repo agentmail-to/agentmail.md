@@ -18,7 +18,7 @@ client for that account instead.
 ## Start
 
 ```bash
-npm install -g agentmail-cli
+npm install -g agentmail-cli@latest
 export AGENTMAIL_API_KEY="am_..."
 agentmail inboxes list --format json
 ```
