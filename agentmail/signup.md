@@ -30,10 +30,12 @@ agentmail agent verify --otp-code 123456
 ## Notes
 
 - Use a real human email address for `--human-email`.
-- `human_email` is the signup idempotency key, but signing up again with the
-  same email rotates the API key.
-- Before verification, the account has one inbox, 10 sends/day, and can only
-  send to the signup human email.
+- Signing up again with the same `--human-email` is destructive: it rotates
+  the API key and invalidates the old one. Do not re-run sign-up for an
+  existing agent unless you intend to revoke its current key.
+- Before verification, the account is limited (currently one inbox, 10
+  sends/day, sends restricted to the signup human email); these limits are
+  plan-dependent and may change.
 
 ## First Check
 
