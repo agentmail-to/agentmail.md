@@ -11,6 +11,7 @@ https://mcp.agentmail.to/mcp
 
 Authentication:
 
-- OAuth in compatible MCP clients.
-- API key in `?apiKey=...`.
-- API key in an `x-api-key` header.
+- OAuth in compatible MCP clients (preferred).
+- API key in an `x-api-key` header when OAuth is unavailable.
+
+Never pass the API key as a URL query parameter.
